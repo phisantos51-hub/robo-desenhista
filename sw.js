@@ -1,5 +1,5 @@
 // Guarda uma cópia do jogo no computador para ele abrir mesmo sem internet.
-const CACHE = "robo-desenhista-v1";
+const CACHE = "robo-desenhista-v2";
 const ARQUIVOS = ["./", "./index.html"];
 
 self.addEventListener("install", (e) => {

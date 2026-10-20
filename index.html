@@ -10,16 +10,15 @@
 <style>
 :root {
   --fundo: #e8f4ff;
-  --fundo2: #fff8e1;
   --tinta: #1a2433;
   --tinta-suave: #44546a;
   --cartao: #ffffff;
+  --cartao2: #f5f9ff;
   --borda: #1a2433;
   --azul: #1e63d6;
-  --verde: #1f8a3b;
-  --laranja: #e65100;
-  --roxo: #6a1b9a;
-  --rosa: #c2185b;
+  --azul-escuro: #0d3c8a;
+  --verde-btn: #2fbf4f;
+  --verde-borda: #0f5a22;
   --amarelo: #ffd54f;
   --cima: #1565c0;
   --baixo: #e65100;
@@ -27,8 +26,14 @@
   --dir: #2e7d32;
   --rep: #6a1b9a;
   --rep-claro: #f3e5f5;
+  --rep-dentro: #e1bee7;
   --dica: #ff6d00;
+  --rodando: #ffd600;
+  --dica-fundo: #fff3e0;
+  --dica-borda: #b34700;
   --sombra: 0 5px 0 rgba(26, 36, 51, .25);
+  --bloco: 74px;
+  --bloco-prog: 62px;
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; }
@@ -42,9 +47,12 @@ body {
   line-height: 1.3;
 }
 body.maiusculas { text-transform: uppercase; }
-button { font: inherit; color: inherit; text-transform: inherit; cursor: pointer; }
-button:focus-visible { outline: 5px solid #ffab00; outline-offset: 3px; }
+button, input { font: inherit; color: inherit; text-transform: inherit; }
+button { cursor: pointer; }
+button:focus-visible, [tabindex]:focus-visible { outline: 5px solid #ffab00; outline-offset: 3px; }
+#zona-jogo:focus { outline: none; }
 .oculto { display: none !important; }
+.so-leitor { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 /* ---------- Telas ---------- */
 .tela { display: none; min-height: 100vh; flex-direction: column; }
@@ -53,7 +61,7 @@ button:focus-visible { outline: 5px solid #ffab00; outline-offset: 3px; }
 .barra {
   display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
   padding: 10px 16px; background: var(--azul); color: #fff;
-  border-bottom: 5px solid #0d3c8a;
+  border-bottom: 5px solid var(--azul-escuro);
 }
 .barra h1, .barra h2 { margin: 0; font-size: 28px; flex: 1; min-width: 180px; }
 .barra .espaco { flex: 1; }
@@ -71,10 +79,10 @@ button:focus-visible { outline: 5px solid #ffab00; outline-offset: 3px; }
 .btn[disabled] { opacity: .45; cursor: not-allowed; transform: none; }
 .btn .ico { font-size: 26px; line-height: 1; }
 .btn-barra { background: #fff; color: var(--tinta); min-height: 50px; font-size: 18px; }
-.btn-verde { background: #2fbf4f; color: #fff; border-color: #0f5a22; text-shadow: 0 2px 0 rgba(0,0,0,.35); }
-.btn-laranja { background: #ff9800; color: #1a2433; border-color: #7a3b00; }
+.btn-verde { background: var(--verde-btn); color: #fff; border-color: var(--verde-borda); text-shadow: 0 2px 0 rgba(0,0,0,.35); }
 .btn-vermelho { background: #ffcdd2; border-color: #8e1b1b; }
 .btn-ativo { background: var(--amarelo); }
+.btn-pausa { display: none; }
 
 /* ---------- Tela inicial ---------- */
 .inicio-conteudo {
@@ -101,6 +109,12 @@ button:focus-visible { outline: 5px solid #ffab00; outline-offset: 3px; }
 .ano-1 { background: #fff3c4; }
 .ano-2 { background: #d7f5dd; }
 .ano-3 { background: #ffe0ec; }
+.btn-comecar-audio { font-size: 30px; min-height: 90px; padding: 10px 36px; }
+.rodape-inicio { width: 100%; display: flex; justify-content: flex-end; padding: 0 16px 16px; }
+.btn-professor {
+  background: transparent; border: 2px solid #90a4ae; border-radius: 12px; color: var(--tinta-suave);
+  font-size: 16px; padding: 8px 14px; min-height: 44px;
+}
 
 .cores { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
 .btn-cor {
@@ -122,19 +136,23 @@ button:focus-visible { outline: 5px solid #ffab00; outline-offset: 3px; }
 .fases-conteudo { padding: 20px 16px 40px; max-width: 1200px; margin: 0 auto; width: 100%; }
 .fases-info { font-size: 22px; margin: 0 0 16px; }
 .grade-fases { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 18px; }
-.btn-fase {
-  flex-direction: column; min-height: 230px; border-radius: 20px; padding: 12px; gap: 6px;
-}
+.btn-fase { flex-direction: column; min-height: 230px; border-radius: 20px; padding: 12px; gap: 6px; }
 .btn-fase svg { width: 110px; height: 110px; }
 .btn-fase .num { font-size: 18px; color: var(--tinta-suave); }
 .btn-fase .nome { font-size: 21px; }
+.btn-fase.trancada { background: #eceff1; color: #607080; box-shadow: none; }
+.btn-fase.trancada svg { opacity: .3; }
+.btn-fase.trancada:hover { transform: none; }
+.cadeado { font-size: 26px; }
 .estrelinhas { font-size: 26px; letter-spacing: 2px; }
 .estrela-on { color: #ffb300; text-shadow: 0 0 1px #6d4c00, 0 2px 0 #6d4c00; }
 .estrela-off { color: #cfd8dc; }
+.feita { font-size: 20px; color: #2e6b3a; }
 .btn-livre { background: linear-gradient(135deg, #fff3c4, #ffe0ec, #d7f5dd); }
 
 /* ---------- Tela do jogo ---------- */
 .jogo-topo .titulo-fase { font-size: 24px; flex: 1; min-width: 200px; }
+.calmo-info { display: none; }
 .jogo-corpo {
   flex: 1; display: grid; gap: 14px; padding: 12px 14px;
   grid-template-columns: auto minmax(0, 1fr);
@@ -149,7 +167,7 @@ button:focus-visible { outline: 5px solid #ffab00; outline-offset: 3px; }
 }
 .balao .rosto { font-size: 38px; }
 .balao.festa { background: #e8f5e9; border-color: #1b5e20; }
-.balao.dica { background: #fff3e0; border-color: #b34700; animation: chacoalha .5s; }
+.balao.dica { background: var(--dica-fundo); border-color: var(--dica-borda); animation: chacoalha .5s; }
 @keyframes chacoalha { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
 
 .tabuleiro-e-modelo { display: flex; gap: 14px; align-items: flex-start; }
@@ -187,11 +205,11 @@ button:focus-visible { outline: 5px solid #ffab00; outline-offset: 3px; }
 .painel h3 .contador.cheio { background: #fff3c4; border-color: #7a5d00; }
 .paleta { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
 .bloco {
-  width: 74px; height: 74px; border-radius: 16px; border: 4px solid var(--borda);
+  width: var(--bloco); height: var(--bloco); border-radius: 16px; border: 4px solid var(--borda);
   color: #fff; display: inline-grid; place-items: center; padding: 0;
   box-shadow: var(--sombra); position: relative; flex: none;
 }
-.bloco svg { width: 46px; height: 46px; }
+.bloco svg { width: 62%; height: 62%; }
 .bloco:active { transform: translateY(3px); }
 .bloco-U { background: var(--cima); }
 .bloco-D { background: var(--baixo); }
@@ -204,20 +222,19 @@ button:focus-visible { outline: 5px solid #ffab00; outline-offset: 3px; }
   width: auto; padding: 0 16px; background: var(--rep); gap: 8px; display: inline-flex;
   font-weight: bold; font-size: 20px; color: #fff;
 }
-.btn-sair-rep { min-height: 74px; background: var(--rep-claro); border-color: var(--rep); color: var(--rep); }
+.btn-sair-rep { min-height: var(--bloco); background: var(--rep-claro); border-color: var(--rep); color: var(--rep); }
 .paleta .bloco[disabled] { opacity: .35; cursor: not-allowed; }
 
 .programa {
   flex: 1; min-height: 150px; overflow-y: auto;
   background: #f5f7fa; border: 4px dashed #90a4ae; border-radius: 16px; padding: 10px;
   display: flex; flex-wrap: wrap; align-content: flex-start; align-items: center; gap: 8px;
-  cursor: pointer;
+  cursor: pointer; list-style: none; margin: 0;
 }
-.programa .bloco { width: 62px; height: 62px; border-radius: 14px; }
-.programa .bloco svg { width: 38px; height: 38px; }
+.programa .bloco { width: var(--bloco-prog); height: var(--bloco-prog); border-radius: 14px; }
 .programa .vazio { color: var(--tinta-suave); font-size: 20px; padding: 10px; pointer-events: none; }
 .cursor {
-  width: 8px; height: 62px; border-radius: 4px; background: var(--azul); flex: none;
+  width: 8px; height: var(--bloco-prog); border-radius: 4px; background: var(--azul); flex: none;
   animation: piscaCursor 1s steps(2) infinite;
 }
 @keyframes piscaCursor { 50% { opacity: .15; } }
@@ -242,8 +259,8 @@ button:focus-visible { outline: 5px solid #ffab00; outline-offset: 3px; }
   border-left: 14px solid var(--rep); margin: 0 0 8px 0; cursor: pointer;
 }
 .rep-corpo .vazio { font-size: 16px; color: var(--rep); }
-.rep.dentro .rep-corpo { background: #e1bee7; }
-.rodando { outline: 6px solid #ffd600; outline-offset: 2px; transform: scale(1.08); z-index: 2; }
+.rep.dentro .rep-corpo { background: var(--rep-dentro); }
+.rodando { outline: 6px solid var(--rodando); outline-offset: 2px; transform: scale(1.08); z-index: 2; }
 .rep.rodando { transform: none; }
 .dica-bloco { animation: pulsoDica 1s ease-in-out infinite; outline: 6px solid var(--dica); outline-offset: 3px; z-index: 3; }
 .dica-bloco::after {
@@ -261,12 +278,10 @@ button:focus-visible { outline: 5px solid #ffab00; outline-offset: 3px; }
 .celula-rastro { transform-box: fill-box; transform-origin: center; animation: aparece .3s ease-out; }
 @keyframes aparece { from { transform: scale(.2); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 #robo { transition: transform .28s ease-in-out; }
-.robo-pula { animation: pula .4s; transform-box: fill-box; transform-origin: center bottom; }
-@keyframes pula { 50% { transform: translateY(-14px); } }
 .pisca { animation: piscaSvg 1s ease-in-out infinite; }
 @keyframes piscaSvg { 50% { opacity: .25; } }
 
-/* ---------- Janelas (modais) ---------- */
+/* ---------- Janelas ---------- */
 .modal {
   position: fixed; inset: 0; background: rgba(10, 20, 40, .6); display: none;
   align-items: center; justify-content: center; padding: 16px; z-index: 50;
@@ -278,9 +293,9 @@ button:focus-visible { outline: 5px solid #ffab00; outline-offset: 3px; }
   box-shadow: 0 10px 0 rgba(0,0,0,.3); text-align: center; position: relative;
 }
 .janela h2 { margin: 0 0 12px; font-size: 32px; color: var(--azul); }
-.passos { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin: 10px 0 18px; }
+.passos { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin: 10px 0 18px; padding: 0; list-style: none; }
 .passo {
-  border: 4px solid var(--borda); border-radius: 18px; padding: 10px; background: #f5f9ff;
+  border: 4px solid var(--borda); border-radius: 18px; padding: 10px; background: var(--cartao2);
   display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 19px; font-weight: bold;
 }
 .passo .numero {
@@ -289,14 +304,23 @@ button:focus-visible { outline: 5px solid #ffab00; outline-offset: 3px; }
 }
 .passo .ilus { min-height: 80px; display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap; }
 .passo .ilus .bloco { width: 50px; height: 50px; border-radius: 12px; }
-.passo .ilus .bloco svg { width: 30px; height: 30px; }
 .passo .ilus .btn-cor { width: 36px; height: 36px; border-width: 3px; box-shadow: 0 0 0 3px var(--borda); }
 .passo .ilus svg.mini { width: 90px; height: 90px; }
 .passo.passo-rep { background: var(--rep-claro); }
+.tecla {
+  display: inline-block; min-width: 38px; padding: 2px 8px; border: 3px solid var(--borda); border-radius: 8px;
+  background: #fff; color: #1a2433; box-shadow: 0 3px 0 rgba(0,0,0,.3); font-size: 17px;
+}
+.lista-teclas { text-align: left; font-size: 17px; font-weight: normal; margin: 0; padding-left: 4px; list-style: none; }
+.lista-teclas li { margin: 4px 0; }
 
 .vitoria-estrelas { font-size: 80px; display: flex; justify-content: center; gap: 10px; margin: 6px 0; }
 .vitoria-estrelas span { display: inline-block; opacity: 0; transform: scale(0); }
 .vitoria-estrelas span.mostra { animation: estrelaEntra .6s cubic-bezier(.2,1.6,.4,1) forwards; }
+.vitoria-estrelas .selo-calmo {
+  opacity: 1; transform: none; width: 110px; height: 110px; border-radius: 50%; background: #d6ecd9;
+  border: 5px solid #2e6b3a; color: #2e6b3a; font-size: 70px; line-height: 100px;
+}
 @keyframes estrelaEntra { to { opacity: 1; transform: scale(1); } }
 .vitoria-texto { font-size: 24px; font-weight: bold; margin: 6px 0; }
 .vitoria-dica { font-size: 20px; color: var(--tinta-suave); margin: 6px 0 14px; }
@@ -319,6 +343,155 @@ button:focus-visible { outline: 5px solid #ffab00; outline-offset: 3px; }
 }
 @keyframes cai { to { transform: translateY(110vh) rotate(720deg); } }
 
+/* Opções de acessibilidade e professor */
+.opcoes { display: flex; flex-direction: column; gap: 12px; text-align: left; margin-bottom: 18px; }
+.opcao {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  border: 4px solid var(--borda); border-radius: 18px; padding: 12px 14px; background: var(--cartao2);
+}
+.opcao .opcao-icone { font-size: 40px; width: 50px; text-align: center; }
+.opcao .opcao-texto { flex: 1; min-width: 220px; }
+.opcao h3 { margin: 0; font-size: 22px; }
+.opcao p { margin: 4px 0 0; font-size: 17px; color: var(--tinta-suave); }
+.sub-opcao { margin-left: 40px; border-width: 3px; background: var(--cartao); }
+.chave {
+  display: inline-flex; align-items: center; gap: 10px; min-height: 56px; min-width: 170px; padding: 6px 14px;
+  border-radius: 30px; border: 4px solid var(--borda); background: #eceff1; font-weight: bold; font-size: 18px;
+}
+.chave .trilho { width: 64px; height: 34px; border-radius: 20px; background: #90a4ae; position: relative; border: 3px solid var(--borda); flex: none; }
+.chave .bola { position: absolute; top: 2px; left: 2px; width: 24px; height: 24px; border-radius: 50%; background: #fff; border: 2px solid var(--borda); transition: left .15s; }
+.chave[aria-checked="true"] { background: #c8f7d2; }
+.chave[aria-checked="true"] .trilho { background: #1f8a3b; }
+.chave[aria-checked="true"] .bola { left: 32px; }
+.pergunta-codigo { font-size: 30px; font-weight: bold; margin: 10px 0; display: inline-block; }
+.campo-codigo {
+  font-size: 34px; width: 160px; text-align: center; padding: 8px; border: 4px solid var(--borda); border-radius: 14px;
+  background: #fff; color: #1a2433;
+}
+.aviso-prof { min-height: 30px; font-weight: bold; margin: 10px 0; }
+.confirma {
+  border: 4px solid #8e1b1b; background: #ffebee; border-radius: 18px; padding: 14px; margin: 10px 0;
+}
+.confirma p { font-size: 22px; font-weight: bold; margin: 0 0 12px; }
+
+/* Pausa */
+#modal-pausa { background: #dfeee9; }
+#modal-pausa .janela { background: #f4faf7; border-color: #6b8f80; box-shadow: none; }
+#modal-pausa h2 { color: #3d6b5a; font-size: 44px; }
+#modal-pausa svg { width: 150px; height: 150px; }
+#modal-pausa p { font-size: 26px; }
+
+/* ---------- MODO CALMO ---------- */
+body.calmo {
+  --fundo: #eef3f1;
+  --azul: #4f7cac;
+  --azul-escuro: #3d6189;
+  --verde-btn: #5f9e6e;
+  --verde-borda: #2f5d3a;
+  --cima: #3f6fa3;
+  --baixo: #b8683a;
+  --esq: #9a4f74;
+  --dir: #4d8656;
+  --rep: #74508f;
+  --dica: #4f7cac;
+  --rodando: #8fb3dd;
+  --dica-fundo: #eef4fb;
+  --dica-borda: #4f7cac;
+  --sombra: 0 3px 0 rgba(26, 36, 51, .15);
+  background-image: none;
+}
+body.calmo .btn-pausa { display: inline-flex; }
+body.calmo .btn:hover { transform: none; }
+body.calmo .titulo-grande svg, body.calmo .figura-palavra { animation: none; }
+body.calmo .subtitulo, body.calmo #btn-velocidade { display: none; }
+body.calmo .pisca, body.calmo .cursor { animation: none; }
+body.calmo .dica-bloco { animation: none; }
+body.calmo .dica-bloco::after { animation: none; }
+body.calmo .balao { min-height: 96px; }
+body.calmo .balao.dica { animation: none; }
+body.calmo .balao.festa { background: #eef6f0; border-color: #2f5d3a; }
+body.calmo .ano-1 { background: #f6f1de; }
+body.calmo .ano-2 { background: #e3f0e6; }
+body.calmo .ano-3 { background: #f1e6ec; }
+body.calmo .btn-livre { background: #eef3f1; }
+body.calmo #tabuleiro { width: min(calc(100vh - 330px), 44vw, 560px); }
+body.calmo .calmo-info {
+  display: flex; gap: 16px; align-items: center; flex-wrap: wrap; justify-content: space-between;
+  padding: 6px 16px; background: #fff; border-bottom: 3px solid #c5d3cc; row-gap: 6px;
+}
+.progresso { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-weight: bold; }
+.progresso-barra { display: flex; gap: 4px; }
+.progresso-barra span {
+  width: 26px; height: 26px; border-radius: 6px; border: 3px solid #6b7f8f; background: #fff;
+  display: grid; place-items: center; font-size: 14px;
+}
+.progresso-barra span.feito { background: #a9cdb2; border-color: #2f5d3a; }
+.progresso-barra span.atual { background: #4f7cac; border-color: #233e5c; color: #fff; }
+.passos-calmo { display: flex; gap: 10px; margin: 0; padding: 0; list-style: none; flex-wrap: wrap; font-weight: bold; }
+.passos-calmo li { display: flex; align-items: center; gap: 6px; background: #eef3f1; border: 3px solid #9fb2a8; border-radius: 12px; padding: 4px 12px; }
+.passos-calmo b { background: #4f7cac; color: #fff; border-radius: 50%; width: 30px; height: 30px; display: grid; place-items: center; }
+
+/* Sem animações */
+body.sem-animacao *, body.sem-animacao *::before, body.sem-animacao *::after { animation: none !important; transition: none !important; }
+body.sem-animacao .vitoria-estrelas span { opacity: 1; transform: none; }
+
+/* ---------- LETRAS E BOTÕES MAIORES ---------- */
+body.grande { font-size: 25px; --bloco: 92px; --bloco-prog: 76px; }
+body.grande .btn { min-height: 66px; font-size: 24px; }
+body.grande .btn-barra { font-size: 21px; min-height: 60px; }
+body.grande .balao { font-size: 25px; }
+body.grande .painel h3 { font-size: 25px; }
+body.grande .acoes .btn { font-size: 21px; min-height: 82px; }
+body.grande .btn-executar { font-size: 34px !important; }
+body.grande .rep-topo { font-size: 23px; }
+body.grande .rep-topo .mais-menos { width: 58px; height: 58px; }
+body.grande .btn-fase .nome { font-size: 25px; }
+body.grande .fases-info, body.grande .passo, body.grande .opcao p { font-size: 22px; }
+body.grande .opcao h3 { font-size: 26px; }
+body.grande .barra h2, body.grande .jogo-topo .titulo-fase { font-size: 30px; }
+body.grande .btn-cor { width: 76px; height: 76px; }
+body.grande .cores-pequenas .btn-cor { width: 50px; height: 50px; }
+
+/* ---------- ALTO CONTRASTE ---------- */
+body.contraste {
+  --fundo: #000; --tinta: #fff; --tinta-suave: #fff; --cartao: #000; --cartao2: #000; --borda: #fff;
+  --azul: #000; --azul-escuro: #ffeb3b; --verde-btn: #ffeb3b; --verde-borda: #fff;
+  --rep: #7b1fa2; --rep-claro: #000; --rep-dentro: #2a0040;
+  --dica: #ffeb3b; --rodando: #00e5ff; --dica-fundo: #000; --dica-borda: #ffeb3b;
+  --sombra: none;
+  background-image: none;
+}
+body.contraste .btn, body.contraste .btn-barra, body.contraste .balao, body.contraste .modelo, body.contraste .painel,
+body.contraste .janela, body.contraste .btn-fase, body.contraste .btn-ano, body.contraste .opcao, body.contraste .calmo-info {
+  background: #000; color: #fff; border-color: #fff;
+}
+body.contraste .btn-verde { background: #ffeb3b; color: #000; text-shadow: none; border-color: #fff; }
+body.contraste .btn-ano small, body.contraste .btn-fase .num { color: #fff; }
+body.contraste .titulo-grande h1 { color: #ffeb3b; text-shadow: none; }
+body.contraste .barra { border-bottom-color: #ffeb3b; }
+body.contraste .bloco { border-color: #fff; }
+body.contraste .programa { background: #111; border-color: #fff; }
+body.contraste .rep { border-color: #e1bee7; }
+body.contraste .rep-topo .vezes { background: #fff; color: #000; }
+body.contraste .cursor { background: #ffeb3b; }
+body.contraste #tabuleiro { border-color: #ffeb3b; }
+body.contraste .passo .numero { background: #ffeb3b; color: #000; }
+body.contraste .letra-show, body.contraste .limite, body.contraste .confirma { background: #000; color: #fff; border-color: #ffeb3b; }
+body.contraste .chave { background: #000; color: #fff; border-color: #fff; }
+body.contraste .chave[aria-checked="true"] { background: #ffeb3b; color: #000; }
+body.contraste .btn-professor { color: #fff; border-color: #fff; }
+body.contraste .btn-fase.trancada { color: #bbb; }
+body.contraste .estrela-off { color: #777; }
+body.contraste .janela h2 { color: #ffeb3b; }
+body.contraste .progresso-barra span { background: #000; border-color: #fff; }
+body.contraste .progresso-barra span.feito { background: #fff; }
+body.contraste .progresso-barra span.atual { background: #ffeb3b; color: #000; }
+body.contraste .passos-calmo li { background: #000; border-color: #fff; }
+body.contraste #modal-pausa { background: #000; }
+body.contraste #modal-pausa h2 { color: #ffeb3b; }
+body.contraste .campo-codigo { border-color: #ffeb3b; }
+body.contraste .painel h3 .contador, body.contraste .painel h3 .contador.cheio { background: #000; color: #fff; border-color: #fff; }
+
 /* ---------- Telas menores ---------- */
 @media (max-width: 1100px) {
   .jogo-corpo { grid-template-columns: 1fr; }
@@ -331,6 +504,7 @@ button:focus-visible { outline: 5px solid #ffab00; outline-offset: 3px; }
   .tabuleiro-e-modelo { flex-direction: column; align-items: center; }
   .modelo { width: 180px; }
   .acoes { grid-template-columns: repeat(2, 1fr); }
+  .sub-opcao { margin-left: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
@@ -339,66 +513,89 @@ button:focus-visible { outline: 5px solid #ffab00; outline-offset: 3px; }
 </head>
 <body class="maiusculas">
 
+<!-- Avisos lidos pelo leitor de tela (NVDA, Narrador) -->
+<div id="anuncio" class="so-leitor" aria-live="assertive" aria-atomic="true"></div>
+
 <!-- ================= TELA INICIAL ================= -->
-<section id="tela-inicio" class="tela ativa" aria-label="Início">
-  <div class="barra">
+<section id="tela-inicio" class="tela ativa" aria-labelledby="titulo-jogo">
+  <header class="barra">
     <span class="espaco"></span>
-    <button class="btn btn-barra" data-acao="ajuda"><span class="ico">❓</span> Como jogar</button>
-    <button class="btn btn-barra btn-som" data-acao="som"><span class="ico">🔇</span> <span class="som-txt">Som desligado</span></button>
-  </div>
-  <div class="inicio-conteudo">
+    <button class="btn btn-barra" data-acao="acess"><span class="ico" aria-hidden="true">♿</span> Acessibilidade</button>
+    <button class="btn btn-barra" data-acao="ajuda"><span class="ico" aria-hidden="true">❓</span> Como jogar</button>
+    <button class="btn btn-barra btn-som" data-acao="som"><span class="ico" aria-hidden="true">🔇</span> <span class="som-txt">Som desligado</span></button>
+    <button class="btn btn-barra btn-pausa" data-acao="pausa"><span class="ico" aria-hidden="true">⏸</span> Pausa</button>
+  </header>
+  <main class="inicio-conteudo">
     <div class="titulo-grande">
       <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#desenho-robo"/></svg>
-      <h1>Robô Desenhista</h1>
+      <h1 id="titulo-jogo">Robô Desenhista</h1>
     </div>
     <p class="subtitulo">Programe o robô com setas e desenhe formas e letras!</p>
+
+    <button class="btn btn-verde btn-comecar-audio oculto" id="btn-comecar-audio"
+      aria-label="Robô Desenhista, Modo Áudio. Aperte Enter para começar.">
+      <span class="ico" aria-hidden="true">🎧</span> Começar o Modo Áudio
+    </button>
 
     <h2 class="passo-titulo">1. Escolha a cor do rastro</h2>
     <div class="cores" id="cores-inicio" role="group" aria-label="Cor do rastro"></div>
 
     <h2 class="passo-titulo">2. Escolha o seu ano</h2>
     <div class="anos">
-      <button class="btn btn-ano ano-1" data-ano="1"><span class="mini-tab">✏️</span>1º ano<small>Tabuleiro 5 × 5<br>Siga o caminho</small></button>
-      <button class="btn btn-ano ano-2" data-ano="2"><span class="mini-tab">🔁</span>2º ano<small>Tabuleiro 6 × 6<br>Copie o modelo</small></button>
-      <button class="btn btn-ano ano-3" data-ano="3"><span class="mini-tab">🏠</span>3º ano<small>Tabuleiro 7 × 7<br>Desafios e Modo Livre</small></button>
+      <button class="btn btn-ano ano-1" data-ano="1"><span class="mini-tab" aria-hidden="true">✏️</span>1º ano<small>Tabuleiro 5 × 5<br>Siga o caminho</small></button>
+      <button class="btn btn-ano ano-2" data-ano="2"><span class="mini-tab" aria-hidden="true">🔁</span>2º ano<small>Tabuleiro 6 × 6<br>Copie o modelo</small></button>
+      <button class="btn btn-ano ano-3" data-ano="3"><span class="mini-tab" aria-hidden="true">🏠</span>3º ano<small>Tabuleiro 7 × 7<br>Desafios e Modo Livre</small></button>
     </div>
+  </main>
+  <div class="rodape-inicio">
+    <button class="btn-professor" data-acao="professor"><span aria-hidden="true">🔑</span> Área do professor</button>
   </div>
 </section>
 
 <!-- ================= TELA DE FASES ================= -->
-<section id="tela-fases" class="tela" aria-label="Fases">
-  <div class="barra">
-    <button class="btn btn-barra" data-acao="inicio"><span class="ico">🏠</span> Início</button>
+<section id="tela-fases" class="tela" aria-labelledby="fases-titulo">
+  <header class="barra">
+    <button class="btn btn-barra" data-acao="inicio"><span class="ico" aria-hidden="true">🏠</span> Início</button>
     <h2 id="fases-titulo">1º ano</h2>
-    <button class="btn btn-barra" data-acao="ajuda"><span class="ico">❓</span> Como jogar</button>
-    <button class="btn btn-barra btn-som" data-acao="som"><span class="ico">🔇</span> <span class="som-txt">Som desligado</span></button>
-  </div>
-  <div class="fases-conteudo">
+    <button class="btn btn-barra" data-acao="ajuda"><span class="ico" aria-hidden="true">❓</span> Como jogar</button>
+    <button class="btn btn-barra btn-som" data-acao="som"><span class="ico" aria-hidden="true">🔇</span> <span class="som-txt">Som desligado</span></button>
+    <button class="btn btn-barra btn-pausa" data-acao="pausa"><span class="ico" aria-hidden="true">⏸</span> Pausa</button>
+  </header>
+  <main class="fases-conteudo">
     <p class="fases-info" id="fases-info"></p>
     <div class="grade-fases" id="grade-fases"></div>
-  </div>
+  </main>
 </section>
 
 <!-- ================= TELA DO JOGO ================= -->
-<section id="tela-jogo" class="tela" aria-label="Jogo">
-  <div class="barra jogo-topo">
-    <button class="btn btn-barra" data-acao="fases"><span class="ico">☰</span> Fases</button>
-    <div class="titulo-fase" id="titulo-fase">Fase</div>
+<section id="tela-jogo" class="tela" aria-labelledby="titulo-fase">
+  <header class="barra jogo-topo">
+    <button class="btn btn-barra" data-acao="fases"><span class="ico" aria-hidden="true">☰</span> Fases</button>
+    <h2 class="titulo-fase" id="titulo-fase">Fase</h2>
     <div class="cores cores-pequenas" id="cores-jogo" role="group" aria-label="Cor do rastro"></div>
-    <button class="btn btn-barra" data-acao="ajuda"><span class="ico">❓</span> Como jogar</button>
-    <button class="btn btn-barra btn-som" data-acao="som"><span class="ico">🔇</span> <span class="som-txt">Som desligado</span></button>
+    <button class="btn btn-barra" data-acao="ajuda"><span class="ico" aria-hidden="true">❓</span> Como jogar</button>
+    <button class="btn btn-barra btn-som" data-acao="som"><span class="ico" aria-hidden="true">🔇</span> <span class="som-txt">Som desligado</span></button>
+    <button class="btn btn-barra btn-pausa" data-acao="pausa"><span class="ico" aria-hidden="true">⏸</span> Pausa</button>
+  </header>
+  <div class="calmo-info" id="calmo-info">
+    <div class="progresso" id="progresso"></div>
+    <ol class="passos-calmo" aria-label="Passos">
+      <li><b>1</b> <span aria-hidden="true">🎨</span> Escolha a cor</li>
+      <li><b>2</b> <span aria-hidden="true">⬆️➡️</span> Monte as setas</li>
+      <li><b>3</b> <span aria-hidden="true">▶️</span> Clique em Executar</li>
+    </ol>
   </div>
-  <div class="jogo-corpo">
+  <main class="jogo-corpo" id="zona-jogo" tabindex="-1">
     <div class="area-tabuleiro">
-      <div class="balao" id="balao" role="status" aria-live="polite"><span class="rosto">🤖</span><span id="balao-texto"></span></div>
+      <div class="balao" id="balao" role="status" aria-live="polite"><span class="rosto" aria-hidden="true">🤖</span><span id="balao-texto"></span></div>
       <div class="tabuleiro-e-modelo">
         <div class="modelo" id="modelo">
           <h3>Modelo</h3>
-          <svg id="modelo-svg" viewBox="0 0 100 100" aria-label="Desenho modelo"></svg>
+          <svg id="modelo-svg" viewBox="0 0 100 100" role="img" aria-label="Desenho modelo"></svg>
           <p>⚪ = o robô começa aqui</p>
           <div class="limite" id="limite-info"></div>
         </div>
-        <svg id="tabuleiro" viewBox="0 0 100 100" aria-label="Tabuleiro"></svg>
+        <svg id="tabuleiro" viewBox="0 0 100 100" role="img" aria-label="Tabuleiro"></svg>
       </div>
       <div class="legenda oculto" id="legenda">
         <span><i class="amostra amostra-falta"></i> Faltou pintar</span>
@@ -407,81 +604,93 @@ button:focus-visible { outline: 5px solid #ffab00; outline-offset: 3px; }
     </div>
 
     <div class="painel">
-      <h3>🧩 Blocos</h3>
-      <div class="paleta" id="paleta">
-        <button class="bloco bloco-U" data-dir="U" aria-label="Seta para cima"><svg viewBox="0 0 40 40"><use href="#seta"/></svg></button>
-        <button class="bloco bloco-D" data-dir="D" aria-label="Seta para baixo"><svg viewBox="0 0 40 40"><use href="#seta"/></svg></button>
-        <button class="bloco bloco-L" data-dir="L" aria-label="Seta para a esquerda"><svg viewBox="0 0 40 40"><use href="#seta"/></svg></button>
-        <button class="bloco bloco-R" data-dir="R" aria-label="Seta para a direita"><svg viewBox="0 0 40 40"><use href="#seta"/></svg></button>
-        <button class="bloco bloco-rep-paleta" id="btn-repetir" aria-label="Bloco repetir">🔁 Repetir</button>
+      <h3 id="titulo-blocos"><span aria-hidden="true">🧩</span> Blocos</h3>
+      <div class="paleta" id="paleta" role="group" aria-labelledby="titulo-blocos">
+        <button class="bloco bloco-U" data-dir="U" aria-label="Seta para cima"><svg viewBox="0 0 40 40" aria-hidden="true"><use href="#seta"/></svg></button>
+        <button class="bloco bloco-D" data-dir="D" aria-label="Seta para baixo"><svg viewBox="0 0 40 40" aria-hidden="true"><use href="#seta"/></svg></button>
+        <button class="bloco bloco-L" data-dir="L" aria-label="Seta para a esquerda"><svg viewBox="0 0 40 40" aria-hidden="true"><use href="#seta"/></svg></button>
+        <button class="bloco bloco-R" data-dir="R" aria-label="Seta para a direita"><svg viewBox="0 0 40 40" aria-hidden="true"><use href="#seta"/></svg></button>
+        <button class="bloco bloco-rep-paleta" id="btn-repetir" aria-label="Bloco repetir"><span aria-hidden="true">🔁</span> Repetir</button>
         <button class="btn btn-sair-rep oculto" id="btn-sair-rep">⤵ Sair do Repetir</button>
       </div>
-      <h3>📜 Meu programa <span class="contador" id="contador">0 blocos</span></h3>
-      <div class="programa" id="programa" aria-label="Programa"></div>
+      <h3 id="titulo-programa"><span aria-hidden="true">📜</span> Meu programa <span class="contador" id="contador">0 blocos</span></h3>
+      <div class="programa" id="programa" aria-labelledby="titulo-programa"></div>
       <div class="acoes">
-        <button class="btn btn-verde btn-executar" id="btn-executar"><span class="ico">▶</span> <span id="txt-executar">Executar</span></button>
-        <button class="btn" id="btn-apagar"><span class="ico">⌫</span> Apagar</button>
-        <button class="btn btn-vermelho" id="btn-limpar"><span class="ico">🗑️</span> <span id="txt-limpar">Limpar tudo</span></button>
-        <button class="btn" id="btn-recomecar"><span class="ico">↺</span> <span id="txt-recomecar">Recomeçar</span></button>
-        <button class="btn" id="btn-velocidade"><span class="ico" id="ico-vel">🐢</span> <span id="txt-vel">Devagar</span></button>
+        <button class="btn btn-verde btn-executar" id="btn-executar"><span class="ico" aria-hidden="true">▶</span> <span id="txt-executar">Executar</span></button>
+        <button class="btn" id="btn-apagar"><span class="ico" aria-hidden="true">⌫</span> Apagar</button>
+        <button class="btn btn-vermelho" id="btn-limpar"><span class="ico" aria-hidden="true">🗑️</span> <span id="txt-limpar">Limpar tudo</span></button>
+        <button class="btn" id="btn-recomecar"><span class="ico" aria-hidden="true">↺</span> <span id="txt-recomecar">Recomeçar</span></button>
+        <button class="btn" id="btn-velocidade"><span class="ico" id="ico-vel" aria-hidden="true">🐢</span> <span id="txt-vel">Devagar</span></button>
       </div>
     </div>
-  </div>
+  </main>
 </section>
 
 <!-- ================= COMO JOGAR ================= -->
 <div class="modal" id="modal-ajuda" role="dialog" aria-modal="true" aria-labelledby="ajuda-titulo">
   <div class="janela">
     <h2 id="ajuda-titulo">❓ Como jogar</h2>
-    <div class="passos">
-      <div class="passo">
+    <ol class="passos">
+      <li class="passo">
         <span class="numero">1</span>
-        <div class="ilus">
+        <div class="ilus" aria-hidden="true">
           <span class="btn-cor" style="background:#e53935"></span>
           <span class="btn-cor" style="background:#1e63d6"></span>
           <span class="btn-cor" style="background:#2e7d32"></span>
         </div>
         Escolha a cor do rastro
-      </div>
-      <div class="passo">
+      </li>
+      <li class="passo">
         <span class="numero">2</span>
-        <div class="ilus">
+        <div class="ilus" aria-hidden="true">
           <span class="bloco bloco-R"><svg viewBox="0 0 40 40"><use href="#seta"/></svg></span>
           <span class="bloco bloco-R"><svg viewBox="0 0 40 40"><use href="#seta"/></svg></span>
           <span class="bloco bloco-D"><svg viewBox="0 0 40 40"><use href="#seta"/></svg></span>
         </div>
         Clique nas setas. Cada seta anda 1 casa.
-      </div>
-      <div class="passo">
+      </li>
+      <li class="passo">
         <span class="numero">3</span>
-        <div class="ilus"><span class="btn btn-verde" style="pointer-events:none"><span class="ico">▶</span> Executar</span></div>
+        <div class="ilus" aria-hidden="true"><span class="btn btn-verde" style="pointer-events:none"><span class="ico">▶</span> Executar</span></div>
         Clique em Executar
-      </div>
-      <div class="passo">
+      </li>
+      <li class="passo">
         <span class="numero">4</span>
-        <div class="ilus" id="ilus-desenho"></div>
-        O robô desenha por onde passa!
-      </div>
-      <div class="passo">
+        <div class="ilus" id="ilus-desenho" aria-hidden="true"></div>
+        O robô desenha por onde passa.
+      </li>
+      <li class="passo">
         <span class="numero">5</span>
-        <div class="ilus"><span style="font-size:40px">👆</span><span class="btn" style="pointer-events:none"><span class="ico">⌫</span> Apagar</span></div>
-        Se um bloco piscar, apague e troque por outro.
-      </div>
-      <div class="passo">
+        <div class="ilus" aria-hidden="true"><span style="font-size:40px">👆</span><span class="btn" style="pointer-events:none"><span class="ico">⌫</span> Apagar</span></div>
+        Se uma seta ficar destacada, apague e troque por outra.
+      </li>
+      <li class="passo">
         <span class="numero">6</span>
-        <div class="ilus" style="font-size:40px">⭐⭐⭐</div>
-        Menos blocos = mais estrelas!
-      </div>
-      <div class="passo passo-rep" id="passo-rep">
-        <span class="numero" style="background:var(--rep)">🔁</span>
-        <div class="ilus">
+        <div class="ilus" style="font-size:40px" aria-hidden="true">⭐⭐⭐</div>
+        Menos blocos = mais estrelas
+      </li>
+      <li class="passo passo-rep" id="passo-rep">
+        <span class="numero" style="background:var(--rep)" aria-hidden="true">🔁</span>
+        <div class="ilus" aria-hidden="true">
           <span class="rep" style="pointer-events:none"><span class="rep-topo">Repetir <span class="vezes">3</span> vezes</span><span class="rep-corpo" style="min-width:0;min-height:0"><span class="bloco bloco-R"><svg viewBox="0 0 40 40"><use href="#seta"/></svg></span></span></span>
         </div>
         Repetir faz os blocos de dentro várias vezes. Use + e − para mudar o número.
-      </div>
-    </div>
+      </li>
+      <li class="passo">
+        <span class="numero" aria-hidden="true">⌨️</span>
+        <ul class="lista-teclas">
+          <li><span class="tecla">← ↑ → ↓</span> põe setas</li>
+          <li><span class="tecla">Enter</span> executa</li>
+          <li><span class="tecla">⌫</span> apaga</li>
+          <li><span class="tecla">Espaço</span> repete a instrução*</li>
+          <li><span class="tecla">L</span> onde está o robô*</li>
+          <li><span class="tecla">H</span> ajuda falada*</li>
+          <li>* no Modo Áudio</li>
+        </ul>
+      </li>
+    </ol>
     <div class="botoes-janela">
-      <button class="btn btn-verde" data-acao="fechar-ajuda"><span class="ico">👍</span> Entendi!</button>
+      <button class="btn btn-verde" data-acao="fechar" data-modal="modal-ajuda"><span class="ico" aria-hidden="true">👍</span> Entendi</button>
     </div>
   </div>
 </div>
@@ -495,15 +704,119 @@ button:focus-visible { outline: 5px solid #ffab00; outline-offset: 3px; }
     <div class="letra-show oculto" id="letra-show">
       <div class="letra-grande" id="letra-grande">L</div>
       <div>
-        <div class="figura-palavra" id="figura-palavra">🌙</div>
+        <div class="figura-palavra" id="figura-palavra" aria-hidden="true">🌙</div>
         <div class="palavra" id="palavra"></div>
       </div>
     </div>
     <div class="vitoria-dica" id="vitoria-dica"></div>
     <div class="botoes-janela">
-      <button class="btn btn-verde" id="btn-proxima"><span class="ico">▶</span> Próxima fase</button>
-      <button class="btn" id="btn-de-novo"><span class="ico">↺</span> Tentar com menos blocos</button>
-      <button class="btn" data-acao="fases-vitoria"><span class="ico">☰</span> Fases</button>
+      <button class="btn btn-verde" id="btn-proxima"><span class="ico" aria-hidden="true">▶</span> Próxima fase</button>
+      <button class="btn" id="btn-de-novo"><span class="ico" aria-hidden="true">↺</span> Tentar com menos blocos</button>
+      <button class="btn" data-acao="fases-vitoria"><span class="ico" aria-hidden="true">☰</span> Fases</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= ACESSIBILIDADE ================= -->
+<div class="modal" id="modal-acess" role="dialog" aria-modal="true" aria-labelledby="acess-titulo">
+  <div class="janela">
+    <h2 id="acess-titulo">♿ Acessibilidade</h2>
+    <p>As escolhas ficam guardadas neste computador.</p>
+    <div class="opcoes">
+      <div class="opcao">
+        <span class="opcao-icone" aria-hidden="true">🎧</span>
+        <div class="opcao-texto"><h3 id="op-audio">Modo Áudio</h3><p>Para estudante cego. Joga com teclado e fones de ouvido. O jogo fala e faz sons que guiam o robô.</p></div>
+        <button class="chave" role="switch" aria-checked="false" data-opcao="audio" aria-labelledby="op-audio"></button>
+      </div>
+      <div class="opcao sub-opcao" data-depende="audio">
+        <span class="opcao-icone" aria-hidden="true">🗣️</span>
+        <div class="opcao-texto"><h3 id="op-voz">Voz do próprio jogo</h3><p>Desligue se o computador usa NVDA ou Narrador, para não ouvir duas vozes ao mesmo tempo.</p></div>
+        <button class="chave" role="switch" aria-checked="true" data-opcao="vozJogo" aria-labelledby="op-voz"></button>
+        <button class="btn" data-acao="testar-voz"><span class="ico" aria-hidden="true">🔈</span> Testar a voz</button>
+      </div>
+      <div class="opcao">
+        <span class="opcao-icone" aria-hidden="true">🌿</span>
+        <div class="opcao-texto"><h3 id="op-calmo">Modo Calmo</h3><p>Tela simples, cores suaves, nada piscando, passos numerados e botão Pausa.</p></div>
+        <button class="chave" role="switch" aria-checked="false" data-opcao="calmo" aria-labelledby="op-calmo"></button>
+      </div>
+      <div class="opcao sub-opcao" data-depende="calmo">
+        <span class="opcao-icone" aria-hidden="true">⏹️</span>
+        <div class="opcao-texto"><h3 id="op-anim">Desligar todas as animações</h3><p>Nada se mexe na tela. O robô pula direto de uma casa para a outra.</p></div>
+        <button class="chave" role="switch" aria-checked="false" data-opcao="semAnim" aria-labelledby="op-anim"></button>
+      </div>
+      <div class="opcao">
+        <span class="opcao-icone" aria-hidden="true">🔠</span>
+        <div class="opcao-texto"><h3 id="op-grande">Letras e botões maiores</h3><p>Aumenta os textos, as setas e os botões.</p></div>
+        <button class="chave" role="switch" aria-checked="false" data-opcao="grande" aria-labelledby="op-grande"></button>
+      </div>
+      <div class="opcao">
+        <span class="opcao-icone" aria-hidden="true">◐</span>
+        <div class="opcao-texto"><h3 id="op-contraste">Alto contraste</h3><p>Fundo preto, letras brancas e bordas amarelas.</p></div>
+        <button class="chave" role="switch" aria-checked="false" data-opcao="contraste" aria-labelledby="op-contraste"></button>
+      </div>
+    </div>
+    <div class="botoes-janela">
+      <button class="btn btn-verde" data-acao="fechar" data-modal="modal-acess"><span class="ico" aria-hidden="true">✔</span> Pronto</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= ÁREA DO PROFESSOR ================= -->
+<div class="modal" id="modal-prof" role="dialog" aria-modal="true" aria-labelledby="prof-titulo">
+  <div class="janela">
+    <h2 id="prof-titulo">🔑 Área do professor</h2>
+    <form id="prof-entrada" autocomplete="off">
+      <p>Para entrar, responda:</p>
+      <label class="pergunta-codigo" for="campo-codigo" id="pergunta-codigo">Quanto é 7 + 8?</label><br>
+      <input class="campo-codigo" id="campo-codigo" type="text" inputmode="numeric" maxlength="3">
+      <div class="aviso-prof" id="aviso-prof" role="status"></div>
+      <div class="botoes-janela">
+        <button class="btn btn-verde" type="submit"><span class="ico" aria-hidden="true">🔓</span> Entrar</button>
+        <button class="btn" type="button" data-acao="fechar" data-modal="modal-prof">Cancelar</button>
+      </div>
+    </form>
+    <div id="prof-painel" class="oculto">
+      <div class="opcoes">
+        <div class="opcao">
+          <span class="opcao-icone" aria-hidden="true">🔓</span>
+          <div class="opcao-texto"><h3 id="op-liberar">Liberar todas as fases</h3><p id="liberar-status"></p></div>
+          <button class="chave" role="switch" aria-checked="false" data-opcao="liberado" aria-labelledby="op-liberar"></button>
+        </div>
+        <div class="opcao">
+          <span class="opcao-icone" aria-hidden="true">🗑️</span>
+          <div class="opcao-texto"><h3>Apagar progresso</h3><p>Apaga as fases concluídas e as estrelas deste computador. O jogo volta ao início.</p></div>
+          <button class="btn btn-vermelho" id="btn-apagar-progresso">Apagar progresso</button>
+        </div>
+        <div class="confirma oculto" id="confirma-apagar" role="alertdialog" aria-labelledby="confirma-texto">
+          <p id="confirma-texto">Tem certeza? Isso não pode ser desfeito.</p>
+          <div class="botoes-janela">
+            <button class="btn btn-vermelho" id="btn-confirma-sim">Sim, apagar</button>
+            <button class="btn" id="btn-confirma-nao">Não, voltar</button>
+          </div>
+        </div>
+        <div class="aviso-prof" id="aviso-progresso" role="status"></div>
+        <div class="opcao">
+          <span class="opcao-icone" aria-hidden="true">♿</span>
+          <div class="opcao-texto"><h3>Acessibilidade</h3><p>Modo Áudio, Modo Calmo, letras maiores e alto contraste.</p></div>
+          <button class="btn" data-acao="acess">Abrir configurações</button>
+        </div>
+      </div>
+      <div class="botoes-janela">
+        <button class="btn btn-verde" data-acao="fechar" data-modal="modal-prof"><span class="ico" aria-hidden="true">✔</span> Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= PAUSA ================= -->
+<div class="modal" id="modal-pausa" role="dialog" aria-modal="true" aria-labelledby="pausa-titulo">
+  <div class="janela">
+    <h2 id="pausa-titulo">Pausa</h2>
+    <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#desenho-robo"/></svg>
+    <p>O jogo está parado.</p>
+    <p>Quando quiser voltar, clique no botão.</p>
+    <div class="botoes-janela">
+      <button class="btn btn-verde" data-acao="voltar-pausa"><span class="ico" aria-hidden="true">▶</span> Voltar ao jogo</button>
     </div>
   </div>
 </div>
@@ -524,6 +837,9 @@ button:focus-visible { outline: 5px solid #ffab00; outline-offset: 3px; }
     <pattern id="listras" width="16" height="16" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
       <rect width="16" height="16" fill="#ffe082"/><rect width="6" height="16" fill="#1a2433"/>
     </pattern>
+    <pattern id="listras-calmo" width="16" height="16" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="16" height="16" fill="#e6ebf2"/><rect width="6" height="16" fill="#9aa8bb"/>
+    </pattern>
   </defs>
 </svg>
 
@@ -536,6 +852,8 @@ button:focus-visible { outline: 5px solid #ffab00; outline-offset: 3px; }
    ========================================================= */
 
 const DIRS = { U: [0, -1], D: [0, 1], L: [-1, 0], R: [1, 0] };
+const NOME_DIR = { U: "cima", D: "baixo", L: "esquerda", R: "direita" };
+const PARA_DIR = { U: "para cima", D: "para baixo", L: "para a esquerda", R: "para a direita" };
 const CORES = [
   { nome: "Vermelho", cor: "#e53935" },
   { nome: "Laranja", cor: "#f57c00" },
@@ -546,12 +864,14 @@ const CORES = [
 ];
 
 const ANOS = {
-  1: { tamanho: 5, repetir: false, guia: true, limite: false,
+  1: { tamanho: 5, repetir: false, guia: true, limite: false, rotulo: "1º ano",
        info: "Tabuleiro 5 × 5. O caminho aparece pontilhado: faça o robô passar por cima dele!" },
-  2: { tamanho: 6, repetir: true, guia: false, limite: false,
+  2: { tamanho: 6, repetir: true, guia: false, limite: false, rotulo: "2º ano",
        info: "Tabuleiro 6 × 6. Copie o desenho do modelo. Use o bloco REPETIR para usar menos blocos!" },
-  3: { tamanho: 7, repetir: true, guia: false, limite: true,
-       info: "Tabuleiro 7 × 7. Cada fase tem um limite de blocos. No Modo Livre você desenha o que quiser!" }
+  3: { tamanho: 7, repetir: true, guia: false, limite: true, rotulo: "3º ano",
+       info: "Tabuleiro 7 × 7. Cada fase tem um limite de blocos. No Modo Livre você desenha o que quiser!" },
+  A: { tamanho: 3, repetir: false, guia: true, limite: false, rotulo: "Modo Áudio",
+       info: "Tabuleiros pequenos para jogar com teclado e fones de ouvido." }
 };
 
 const FASES = {
@@ -590,9 +910,33 @@ const FASES = {
     { nome: "Janela", inicio: [0, 0], sol: "6(R)6(D)6(L)6(U)3(D)6(R)3(U)3(L)6(D)" },
     { nome: "Casinha", inicio: [1, 6], sol: "3(U)2(UR)2(RD)3(D)4(L)3(U)4(R)" },
     { nome: "Robô", inicio: [3, 2], sol: "L2(U)2(R)2(D)L2(D)2(R)2(D)4(L)2(U)2(R)" }
+  ],
+  // Modo Áudio: tabuleiros pequenos, só traços retos e letras simples
+  A: [
+    { nome: "Linha para a direita", tamanho: 3, inicio: [0, 1], sol: "RR",
+      descricao: "Uma linha deitada: 2 passos para a direita." },
+    { nome: "Linha para baixo", tamanho: 3, inicio: [1, 0], sol: "DD",
+      descricao: "Uma linha em pé: 2 passos para baixo." },
+    { nome: "Linha para a esquerda", tamanho: 3, inicio: [2, 1], sol: "LL",
+      descricao: "Uma linha deitada: 2 passos para a esquerda." },
+    { nome: "Linha para cima", tamanho: 3, inicio: [1, 2], sol: "UU",
+      descricao: "Uma linha em pé: 2 passos para cima." },
+    { nome: "Canto", tamanho: 3, inicio: [0, 0], sol: "RRDD",
+      descricao: "Um canto: uma linha para a direita e, no fim, uma linha para baixo." },
+    { nome: "Letra L", tamanho: 3, inicio: [0, 0], sol: "DDRR", letra: "L", palavra: "LUA", emoji: "🌙",
+      descricao: "A letra L: uma linha descendo e, no fim, uma linha para a direita." },
+    { nome: "Letra I", tamanho: 4, inicio: [1, 0], sol: "DDD", letra: "I", palavra: "ILHA", emoji: "🏝️",
+      descricao: "A letra I: uma linha reta descendo, com 3 passos." },
+    { nome: "Letra T", tamanho: 3, inicio: [0, 0], sol: "RRLDD", letra: "T", palavra: "TOMATE", emoji: "🍅",
+      descricao: "A letra T: 2 passos para a direita. Depois volte 1 passo, até o meio, e desça 2 passos." },
+    { nome: "Letra L grande", tamanho: 4, inicio: [0, 0], sol: "DDDRRR", letra: "L", palavra: "LUA", emoji: "🌙",
+      descricao: "A letra L grande: 3 passos descendo e, no fim, 3 passos para a direita." },
+    { nome: "Letra T grande", tamanho: 4, inicio: [0, 0], sol: "RRLDDD", letra: "T", palavra: "TOMATE", emoji: "🍅",
+      descricao: "A letra T grande: 2 passos para a direita. Depois volte 1 passo e desça 3 passos." }
   ]
 };
 const LIVRE = { tamanho: 9 };
+const LISTA_ANOS = [1, 2, 3, "A"];
 
 /* ---------- Programas ---------- */
 let proximoId = 1;
@@ -647,7 +991,7 @@ function calcularAlvo(fase) {
   return { caminho, celulas };
 }
 
-for (const ano of [1, 2, 3]) {
+for (const ano of LISTA_ANOS) {
   for (const f of FASES[ano]) {
     Object.assign(f, calcularAlvo(f));
     f.ref = contarBlocos(lerPrograma(f.sol));
@@ -663,33 +1007,176 @@ function estrelasPara(blocos, ref) {
 
 /* ---------- Dados salvos neste computador ---------- */
 const SALVO_CHAVE = "roboDesenhista.v1";
-let salvo = { estrelas: {}, cor: CORES[3].cor, som: false };
+const ACESS_PADRAO = { audio: false, vozJogo: true, calmo: false, semAnim: false, grande: false, contraste: false };
+let salvo = { estrelas: {}, cor: CORES[3].cor, som: false, liberado: false, acess: { ...ACESS_PADRAO } };
 try {
   const t = localStorage.getItem(SALVO_CHAVE);
-  if (t) salvo = Object.assign(salvo, JSON.parse(t));
+  if (t) {
+    const lido = JSON.parse(t);
+    salvo = Object.assign(salvo, lido);
+    salvo.acess = Object.assign({ ...ACESS_PADRAO }, lido.acess || {});
+  }
 } catch (e) { /* sem armazenamento: tudo bem */ }
 function salvar() {
   try { localStorage.setItem(SALVO_CHAVE, JSON.stringify(salvo)); } catch (e) { /* ignora */ }
 }
+const acess = () => salvo.acess;
+function modo() { return acess().audio ? "audio" : acess().calmo ? "calmo" : "normal"; }
 
-/* ---------- Som (desligado por padrão) ---------- */
-let audio = null;
-function tocar(tipo) {
-  if (!salvo.som) return;
+/* ---------- Sons ---------- */
+let audioCtx = null;
+function contexto() {
   try {
-    audio = audio || new (window.AudioContext || window.webkitAudioContext)();
-    const notas = { passo: [660], vitoria: [523, 659, 784, 1047], dica: [440, 392], clique: [880] }[tipo] || [600];
-    notas.forEach((f, i) => {
-      const o = audio.createOscillator(), g = audio.createGain();
-      o.type = "triangle"; o.frequency.value = f;
-      const t0 = audio.currentTime + i * 0.13;
-      g.gain.setValueAtTime(0.0001, t0);
-      g.gain.exponentialRampToValueAtTime(0.15, t0 + 0.02);
-      g.gain.exponentialRampToValueAtTime(0.0001, t0 + (tipo === "passo" || tipo === "clique" ? 0.08 : 0.25));
-      o.connect(g).connect(audio.destination);
-      o.start(t0); o.stop(t0 + 0.3);
-    });
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === "suspended") audioCtx.resume();
+    return audioCtx;
+  } catch (e) { return null; }
+}
+function nota(freq, { pan = 0, dur = 0.2, tipo = "sine", vol = 0.18, atraso = 0, freqFim = null } = {}) {
+  const a = contexto();
+  if (!a) return;
+  try {
+    const t0 = a.currentTime + atraso;
+    const o = a.createOscillator(), g = a.createGain();
+    o.type = tipo;
+    o.frequency.setValueAtTime(freq, t0);
+    if (freqFim) o.frequency.exponentialRampToValueAtTime(freqFim, t0 + dur);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(vol, t0 + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    o.connect(g);
+    let saida = g;
+    if (a.createStereoPanner) {
+      const p = a.createStereoPanner();
+      p.pan.value = Math.max(-1, Math.min(1, pan));
+      g.connect(p); saida = p;
+    }
+    saida.connect(a.destination);
+    o.start(t0); o.stop(t0 + dur + 0.05);
   } catch (e) { /* sem som */ }
+}
+
+// Sons gerais do jogo: desligados por padrão. No Modo Calmo, mais baixos e suaves.
+function tocar(tipo) {
+  if (!salvo.som && !acess().audio) return;
+  const calmo = acess().calmo;
+  const v = calmo ? 0.06 : 0.15;
+  const forma = calmo ? "sine" : "triangle";
+  if (tipo === "passo") nota(660, { dur: 0.08, vol: v, tipo: forma });
+  else if (tipo === "clique") nota(880, { dur: 0.06, vol: v * 0.7, tipo: forma });
+  else if (tipo === "vitoria") [523, 659, 784, 1047].forEach((f, i) => nota(f, { atraso: i * 0.14, dur: 0.3, vol: v, tipo: forma }));
+  else if (tipo === "dica" && !calmo) [440, 392].forEach((f, i) => nota(f, { atraso: i * 0.14, dur: 0.25, vol: v, tipo: forma }));
+}
+
+// Guia sonoro do Modo Áudio: esquerda/direita no fone (estéreo), agudo em cima e grave embaixo.
+function panDe(x, N) { return N > 1 ? ((x / (N - 1)) * 2 - 1) * 0.9 : 0; }
+function freqDe(y, N) { return 880 * Math.pow(0.5, N > 1 ? (y / (N - 1)) * 0.85 : 0); }
+function somComando(dir) {
+  if (dir === "R") nota(523, { pan: 0.9, dur: 0.18 });
+  else if (dir === "L") nota(523, { pan: -0.9, dur: 0.18 });
+  else if (dir === "U") nota(440, { freqFim: 880, dur: 0.22 });
+  else nota(660, { freqFim: 300, dur: 0.22 });
+}
+function somPosicao(x, y, N, certo) {
+  const pan = panDe(x, N), f = freqDe(y, N);
+  if (certo) {
+    nota(f, { pan, dur: 0.35, vol: 0.2 });
+    nota(f * 1.5, { pan, dur: 0.35, vol: 0.07 });
+  } else {
+    nota(f / 2, { pan, tipo: "triangle", dur: 0.16, vol: 0.16 });
+    nota(f / 2 * 0.84, { pan, tipo: "triangle", dur: 0.2, vol: 0.16, atraso: 0.13 });
+  }
+}
+function somBorda(x, N) { nota(150, { pan: panDe(x, N), dur: 0.35, vol: 0.25, freqFim: 90 }); }
+
+/* ---------- Voz e avisos para leitor de tela ---------- */
+let vozPt = null;
+function escolherVoz() {
+  if (!window.speechSynthesis) return;
+  const vozes = speechSynthesis.getVoices();
+  vozPt = vozes.find((v) => /^pt[-_]BR$/i.test(v.lang)) || vozes.find((v) => /^pt/i.test(v.lang)) || null;
+}
+if (window.speechSynthesis) {
+  escolherVoz();
+  speechSynthesis.onvoiceschanged = escolherVoz;
+}
+let anuncioTimer = null;
+function anunciar(texto) {
+  const el = document.getElementById("anuncio");
+  el.textContent = "";
+  clearTimeout(anuncioTimer);
+  anuncioTimer = setTimeout(() => { el.textContent = texto; }, 60);
+}
+// Fala em voz alta (se a voz do jogo estiver ligada) e avisa o leitor de tela.
+function dizer(texto, { interromper = true } = {}) {
+  if (!acess().audio) return;
+  anunciar(texto);
+  if (!acess().vozJogo || !window.speechSynthesis) return;
+  try {
+    if (interromper) speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(texto);
+    u.lang = "pt-BR";
+    if (vozPt) u.voice = vozPt;
+    u.rate = 0.95;
+    speechSynthesis.speak(u);
+  } catch (e) { /* sem voz */ }
+}
+function calar() { try { window.speechSynthesis && speechSynthesis.cancel(); } catch (e) { /* ignora */ } }
+
+/* ---------- Mensagens (normal, calmo e áudio) ---------- */
+const vezes = (k) => (k === 1 ? "1 vez" : k + " vezes");
+const MSG = {
+  guia: { normal: "Faça o robô passar por cima do caminho pontilhado!", calmo: "Faça o robô passar por cima do caminho pontilhado." },
+  copiar: { normal: "Copie o desenho do modelo!", calmo: "Copie o desenho do modelo." },
+  copiarLimite: { normal: (d) => `Copie o modelo usando no máximo ${d.n} blocos.` },
+  vazio: { normal: "Primeiro clique nas setas para montar o programa.",
+           audio: "O programa está vazio. Use as setas para colocar comandos." },
+  desenhando: { normal: "O robô está desenhando...", calmo: "O robô está desenhando.", audio: "O robô vai andar. Escute." },
+  parado: { normal: "Programa parado. Clique em Executar para tentar de novo.", audio: "Programa parado. Aperte Enter para tentar de novo." },
+  fora: {
+    normal: "Quase! Este bloco leva o robô para fora do tabuleiro. Clique em Apagar e escolha outra seta.",
+    calmo: "Vamos tentar de novo. Olhe a seta destacada. Ela leva o robô para fora do tabuleiro. Clique em Apagar e escolha outra seta.",
+    audio: (d) => `${d.desenho} O comando ${d.n}, ${d.dir}, levaria o robô para fora do tabuleiro. Aperte Backspace ${vezes(d.k)} e tente outra seta.`
+  },
+  mais: {
+    normal: "Quase! As casas com ! não fazem parte do desenho. A diferença começou no bloco que pisca: apague e troque.",
+    calmo: "Vamos tentar de novo. Olhe a seta destacada. A partir dela, o desenho ficou diferente do modelo. As casas listradas não fazem parte do desenho.",
+    audio: (d) => `${d.desenho} Ainda não ficou igual ao modelo. O comando ${d.n}, ${d.dir}, saiu do caminho. Aperte Backspace ${vezes(d.k)} e tente outra seta.`
+  },
+  falta: {
+    normal: "Muito bem até aqui! Faltam as casas que piscam. Continue o programa depois do bloco que pisca.",
+    calmo: "Faltam casas para pintar. Elas estão marcadas no tabuleiro. Coloque mais setas no fim do programa.",
+    audio: (d) => `${d.desenho} Muito bem até aqui! Ainda ${d.q === 1 ? "falta 1 casa" : "faltam " + d.q + " casas"}.` +
+      (d.sugestao ? ` Tente uma seta ${d.sugestao}.` : " Coloque mais setas.")
+  },
+  vitoria: {
+    normal: "Você conseguiu! O desenho ficou igual!",
+    calmo: "Fase completa. O desenho está igual ao modelo.",
+    audio: (d) => `${d.desenho} Ficou igual ao modelo! Parabéns! Você ganhou ${d.estrelas === 1 ? "1 estrela" : d.estrelas + " estrelas"}.` +
+      (d.letra ? ` Você desenhou a letra ${d.letra}, de ${d.palavra}.` : "") +
+      (d.ultima ? " Você terminou todas as fases do Modo Áudio!" : " Aperte Enter para ir para a próxima fase.")
+  },
+  livreInicio: { normal: "Desenhe o que quiser! Depois troque a cor e continue desenhando.",
+                 calmo: "Monte as setas e clique em Executar para desenhar. Você pode trocar a cor entre um desenho e outro." },
+  livreFim: { normal: "Que desenho bonito! Troque a cor e continue, ou clique em Nova folha.",
+              calmo: "Desenho feito. Você pode trocar a cor e executar de novo, ou clicar em Nova folha." },
+  limite: { normal: (d) => `Você já usou os ${d.n} blocos. Dica: use o REPETIR para economizar blocos!`,
+            calmo: (d) => `Você já usou os ${d.n} blocos. Use o bloco Repetir para usar menos blocos.` },
+  cheio: { normal: "O programa está bem grande! Clique em Executar para ver o desenho.",
+           calmo: "O programa chegou ao tamanho máximo. Clique em Executar." },
+  recomecar: { normal: "O robô voltou para o começo. Seu programa continua aqui.",
+               calmo: "O robô voltou para a casa inicial. O programa continua igual.",
+               audio: "O robô voltou para o começo. Seu programa continua igual." },
+  novaFolha: { normal: "Folha nova! Desenhe o que quiser.", calmo: "A folha está limpa." },
+  dentroRep: { normal: "Agora clique nas setas que vão DENTRO do Repetir. Depois clique em “Sair do Repetir”." },
+  qualApagar: { normal: "Clique no bloco que você quer apagar e depois em Apagar." },
+  menosBlocos: { normal: "Tente desenhar a mesma figura com menos blocos!" }
+};
+function msg(k, d = {}) {
+  const m = MSG[k], md = modo();
+  let v = m[md];
+  if (v === undefined) v = md === "audio" && m.calmo !== undefined ? m.calmo : m.normal;
+  return typeof v === "function" ? v(d) : v;
 }
 
 /* ---------- Estado do jogo ---------- */
@@ -697,8 +1184,9 @@ const est = {
   ano: 1, faseIdx: 0, livre: false, tamanho: 5,
   programa: [], cursor: { pai: null, pos: 0 },
   robo: [0, 0], pintadas: new Map(),
-  rodando: false, parar: false, rapido: false,
-  dicaId: null, foraDoTabuleiro: null, diferencas: null
+  rodando: false, parar: false, pausado: false, rapido: false,
+  dicaId: null, foraDoTabuleiro: null, diferencas: null,
+  teclasDitas: false, instrucao: ""
 };
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => document.querySelectorAll(s);
@@ -710,13 +1198,65 @@ function svgEl(tag, attrs, pai) {
   return el;
 }
 const esperar = (ms) => new Promise((r) => setTimeout(r, ms));
+// Espera, mas fica parado enquanto o jogo estiver em pausa.
+async function aguardar(ms) {
+  await esperar(ms);
+  while (est.pausado && !est.parar) await esperar(100);
+}
 const faseAtual = () => (est.livre ? null : FASES[est.ano][est.faseIdx]);
+const telaAtiva = () => ($(".tela.ativa") || {}).id;
 
 /* ---------- Telas ---------- */
+let focoSilencioso = false;
+function focar(el) {
+  if (!el) return;
+  focoSilencioso = true;
+  el.focus();
+  focoSilencioso = false;
+}
+
 function mostrarTela(id) {
   $$(".tela").forEach((t) => t.classList.toggle("ativa", t.id === id));
-  document.body.classList.toggle("maiusculas", id === "tela-inicio" || est.ano === 1);
+  atualizarMaiusculas();
   window.scrollTo(0, 0);
+  if (id === "tela-inicio" && acess().audio) {
+    focar($("#btn-comecar-audio"));
+    dizer("Robô Desenhista. Modo Áudio. Aperte Enter para começar.");
+  }
+}
+function atualizarMaiusculas() {
+  const id = telaAtiva();
+  document.body.classList.toggle("maiusculas", id === "tela-inicio" || est.ano === 1 || est.ano === "A");
+}
+
+function aplicarAcess() {
+  const a = acess();
+  document.body.classList.toggle("modo-audio", a.audio);
+  document.body.classList.toggle("calmo", a.calmo);
+  document.body.classList.toggle("sem-animacao", a.calmo && a.semAnim);
+  document.body.classList.toggle("grande", a.grande);
+  document.body.classList.toggle("contraste", a.contraste);
+  $("#btn-comecar-audio").classList.toggle("oculto", !a.audio);
+  // No Modo Áudio, os avisos vão pela região própria (evita leitura dobrada)
+  $("#balao").setAttribute("aria-live", a.audio ? "off" : "polite");
+  const zona = $("#zona-jogo");
+  if (a.audio) {
+    zona.setAttribute("role", "application");
+    zona.setAttribute("aria-label", "Jogo do robô. Setas colocam comandos. Enter faz o robô desenhar. H é a ajuda.");
+  } else {
+    zona.removeAttribute("role");
+    zona.removeAttribute("aria-label");
+  }
+  $$(".chave").forEach((c) => {
+    const op = c.dataset.opcao;
+    const ligado = op === "liberado" ? salvo.liberado : !!a[op];
+    c.setAttribute("aria-checked", ligado ? "true" : "false");
+    c.innerHTML = `<span class="trilho" aria-hidden="true"><span class="bola"></span></span><span>${ligado ? "Ligado" : "Desligado"}</span>`;
+  });
+  $$("[data-depende]").forEach((el) => el.classList.toggle("oculto", !a[el.dataset.depende]));
+  $("#liberar-status").textContent = salvo.liberado
+    ? "Agora: todas as fases estão abertas neste computador."
+    : "Agora: as fases abrem uma por vez, quando a anterior é terminada.";
 }
 
 function desenharCores() {
@@ -728,6 +1268,7 @@ function desenharCores() {
       b.style.background = c.cor;
       b.title = c.nome;
       b.setAttribute("aria-label", "Cor " + c.nome);
+      b.setAttribute("aria-pressed", c.cor === salvo.cor ? "true" : "false");
       b.addEventListener("click", () => escolherCor(c.cor));
       caixa.appendChild(b);
     }
@@ -739,10 +1280,9 @@ function escolherCor(cor) {
   desenharCores();
   if (est.rodando) return; // a cor nova vale na próxima vez que executar
   if (!est.livre) {
-    // Na fase, o rastro inteiro troca de cor
     for (const k of est.pintadas.keys()) est.pintadas.set(k, cor);
   }
-  desenharTabuleiro();
+  if (telaAtiva() === "tela-jogo") desenharTabuleiro();
 }
 
 function atualizarSom() {
@@ -750,6 +1290,7 @@ function atualizarSom() {
     b.querySelector(".ico").textContent = salvo.som ? "🔊" : "🔇";
     b.querySelector(".som-txt").textContent = salvo.som ? "Som ligado" : "Som desligado";
     b.classList.toggle("btn-ativo", salvo.som);
+    b.setAttribute("aria-pressed", salvo.som ? "true" : "false");
   });
 }
 
@@ -770,30 +1311,66 @@ function desenharMini(svg, celulas, tamanho, inicio, corCelula) {
 }
 
 /* ---------- Tela de fases ---------- */
-function abrirAno(ano) {
+function faseLiberada(ano, i) {
+  return salvo.liberado || i === 0 || (salvo.estrelas[ano + "-" + (i - 1)] || 0) > 0;
+}
+function proximaFaseAberta(ano) {
+  const lista = FASES[ano];
+  for (let i = 0; i < lista.length; i++) if (!salvo.estrelas[ano + "-" + i] && faseLiberada(ano, i)) return i;
+  return 0;
+}
+
+function abrirAno(ano, focoIdx) {
+  est.parar = true;
   est.ano = ano;
-  $("#fases-titulo").textContent = ano + "º ano — escolha a fase";
+  $("#fases-titulo").textContent = ANOS[ano].rotulo + " — escolha a fase";
   $("#fases-info").textContent = ANOS[ano].info;
   const grade = $("#grade-fases");
   grade.innerHTML = "";
+  const calmo = acess().calmo;
   FASES[ano].forEach((f, i) => {
     const b = document.createElement("button");
     b.className = "btn btn-fase";
     const n = salvo.estrelas[ano + "-" + i] || 0;
-    b.innerHTML = `<span class="num">Fase ${i + 1}</span><svg></svg><span class="nome">${f.nome}</span>
-      <span class="estrelinhas" aria-label="${n} estrelas">${estrelasHTML(n)}</span>`;
-    desenharMini(b.querySelector("svg"), f.celulas, ANOS[ano].tamanho, null, salvo.cor);
-    b.addEventListener("click", () => iniciarFase(ano, i));
+    const aberta = faseLiberada(ano, i);
+    let rotulo = `Fase ${i + 1}, ${f.nome}`;
+    let rodape;
+    if (!aberta) {
+      b.classList.add("trancada");
+      b.setAttribute("aria-disabled", "true");
+      rotulo += `, trancada. Termine a fase ${i} para abrir.`;
+      rodape = `<span class="cadeado" aria-hidden="true">🔒</span>`;
+    } else if (calmo) {
+      rotulo += n ? ", feita" : "";
+      rodape = `<span class="feita">${n ? "✔ Feita" : "&nbsp;"}</span>`;
+    } else {
+      rotulo += n ? `, ${n} ${n === 1 ? "estrela" : "estrelas"}` : ", ainda não feita";
+      rodape = `<span class="estrelinhas" aria-hidden="true">${estrelasHTML(n)}</span>`;
+    }
+    b.setAttribute("aria-label", rotulo);
+    b.innerHTML = `<span class="num" aria-hidden="true">Fase ${i + 1}</span><svg aria-hidden="true"></svg><span class="nome" aria-hidden="true">${f.nome}</span>${rodape}`;
+    desenharMini(b.querySelector("svg"), f.celulas, f.tamanho || ANOS[ano].tamanho, null, salvo.cor);
+    b.addEventListener("click", () => {
+      if (aberta) iniciarFase(ano, i);
+      else if (acess().audio) dizer(`Esta fase está trancada. Termine a fase ${i} primeiro.`);
+      else b.querySelector(".nome").textContent = `Termine a fase ${i} primeiro`;
+    });
     grade.appendChild(b);
   });
   if (ano === 3) {
     const b = document.createElement("button");
     b.className = "btn btn-fase btn-livre";
-    b.innerHTML = `<span class="num">Desenhe o que quiser</span><span style="font-size:80px;line-height:1">🎨</span><span class="nome">Modo Livre</span>`;
+    b.innerHTML = `<span class="num">Desenhe o que quiser</span><span style="font-size:80px;line-height:1" aria-hidden="true">🎨</span><span class="nome">Modo Livre</span>`;
     b.addEventListener("click", () => iniciarLivre());
     grade.appendChild(b);
   }
   mostrarTela("tela-fases");
+  if (acess().audio) {
+    const idx = focoIdx !== undefined ? focoIdx : proximaFaseAberta(ano);
+    const alvo = grade.children[idx];
+    focar(alvo);
+    dizer(`Escolha a fase com as setas e aperte Enter. ${alvo.getAttribute("aria-label")}`);
+  }
 }
 function estrelasHTML(n) {
   let s = "";
@@ -806,18 +1383,21 @@ function prepararJogo() {
   est.programa = [];
   est.cursor = { pai: null, pos: 0 };
   est.dicaId = null;
+  est.parar = false;
+  est.pausado = false;
   desenharCores();
   mostrarTela("tela-jogo");
   reiniciarTabuleiro();
   desenharPrograma();
+  desenharProgresso();
 }
 
 function iniciarFase(ano, idx) {
   est.ano = ano; est.faseIdx = idx; est.livre = false;
-  est.tamanho = ANOS[ano].tamanho;
   const f = faseAtual();
-  $("#titulo-fase").textContent = `${ano}º ano · Fase ${idx + 1}: ${f.nome}`;
   const cfg = ANOS[ano];
+  est.tamanho = f.tamanho || cfg.tamanho;
+  $("#titulo-fase").textContent = `${cfg.rotulo} · Fase ${idx + 1}: ${f.nome}`;
   $("#modelo").classList.toggle("oculto", cfg.guia);
   if (!cfg.guia) desenharMini($("#modelo-svg"), f.celulas, est.tamanho, f.inicio, "#37474f");
   $("#limite-info").classList.toggle("oculto", !f.limite);
@@ -825,9 +1405,16 @@ function iniciarFase(ano, idx) {
   $("#btn-repetir").classList.toggle("oculto", !cfg.repetir);
   $("#txt-recomecar").textContent = "Recomeçar";
   prepararJogo();
-  if (cfg.guia) falar("Faça o robô passar por cima do caminho pontilhado!");
-  else if (f.limite) falar(`Copie o modelo usando no máximo ${f.limite} blocos.`);
-  else falar("Copie o desenho do modelo!");
+  if (ano === "A") {
+    let texto = `Fase ${idx + 1}. ${f.descricao} O robô começa ${posicaoTexto(f.inicio[0], f.inicio[1], est.tamanho)}.`;
+    est.instrucao = texto;
+    if (!est.teclasDitas) texto += " Use as setas para colocar comandos. Enter faz o robô desenhar. H é a ajuda.";
+    est.teclasDitas = true;
+    falar(texto);
+    focar($("#zona-jogo"));
+  } else if (cfg.guia) falar(msg("guia"));
+  else if (f.limite) falar(msg("copiarLimite", { n: f.limite }));
+  else falar(msg("copiar"));
 }
 
 function iniciarLivre() {
@@ -837,7 +1424,21 @@ function iniciarLivre() {
   $("#btn-repetir").classList.remove("oculto");
   $("#txt-recomecar").textContent = "Nova folha";
   prepararJogo();
-  falar("Desenhe o que quiser! Depois troque a cor e continue desenhando.");
+  falar(msg("livreInicio"));
+}
+
+// Barra do Modo Calmo: em qual fase está e quantas faltam
+function desenharProgresso() {
+  const caixa = $("#progresso");
+  if (est.livre) { caixa.innerHTML = "<span>Modo Livre</span>"; return; }
+  const total = FASES[est.ano].length, atual = est.faseIdx + 1, faltam = total - atual;
+  let barra = "";
+  for (let i = 0; i < total; i++) {
+    const cls = i === est.faseIdx ? "atual" : salvo.estrelas[est.ano + "-" + i] ? "feito" : "";
+    barra += `<span class="${cls}" aria-hidden="true">${i === est.faseIdx ? atual : ""}</span>`;
+  }
+  caixa.innerHTML = `<span>Fase ${atual} de ${total}</span><span class="progresso-barra">${barra}</span>` +
+    `<span>${faltam === 0 ? "Esta é a última fase." : `Depois desta, ${faltam === 1 ? "falta 1 fase" : `faltam ${faltam} fases`}.`}</span>`;
 }
 
 function falar(texto, tipo) {
@@ -845,9 +1446,66 @@ function falar(texto, tipo) {
   b.classList.remove("dica", "festa");
   void b.offsetWidth; // reinicia a animação
   if (tipo) b.classList.add(tipo);
-  b.querySelector(".rosto").textContent = tipo === "festa" ? "🥳" : tipo === "dica" ? "💡" : "🤖";
+  const calmo = acess().calmo;
+  b.querySelector(".rosto").textContent = calmo ? "🤖" : tipo === "festa" ? "🥳" : tipo === "dica" ? "💡" : "🤖";
   $("#balao-texto").textContent = texto;
+  dizer(texto);
 }
+
+/* ---------- Textos para o Modo Áudio ---------- */
+function posicaoTexto(x, y, N) {
+  if (N === 3) {
+    if (x === 1 && y === 1) return "bem no meio do tabuleiro";
+    return `${["em cima", "no meio", "embaixo"][y]}, ${["à esquerda", "no meio", "à direita"][x]}`;
+  }
+  if (N === 4) {
+    return `${["em cima", "na segunda linha", "na terceira linha", "embaixo"][y]}, ${["à esquerda", "na segunda coluna", "na terceira coluna", "à direita"][x]}`;
+  }
+  return `na linha ${y + 1} e na coluna ${x + 1}`;
+}
+function resumoCaminho(dirs) {
+  if (!dirs.length) return "O robô não chegou a andar.";
+  const partes = [];
+  for (const d of dirs) {
+    const u = partes[partes.length - 1];
+    if (u && u.d === d) u.n++;
+    else partes.push({ d, n: 1 });
+  }
+  const frases = partes.map((p) => `${p.n} ${p.n === 1 ? "passo" : "passos"} ${PARA_DIR[p.d]}`);
+  return "O robô desenhou: " + (frases.length > 1 ? frases.slice(0, -1).join(", ") + " e " + frases[frases.length - 1] : frases[0]) + ".";
+}
+function simular() {
+  const f = faseAtual();
+  let [x, y] = f ? f.inicio : est.robo;
+  const passos = achatar(est.programa);
+  for (let i = 0; i < passos.length; i++) {
+    const nx = x + DIRS[passos[i].dir][0], ny = y + DIRS[passos[i].dir][1];
+    if (nx < 0 || ny < 0 || nx >= est.tamanho || ny >= est.tamanho) return { x, y, sai: i };
+    x = nx; y = ny;
+  }
+  return { x, y, sai: null };
+}
+function dizerOnde() {
+  const f = faseAtual(), N = est.tamanho;
+  const [x0, y0] = f ? f.inicio : est.robo;
+  const n = contarBlocos(est.programa);
+  let texto = `O robô começa ${posicaoTexto(x0, y0, N)}.`;
+  const s = simular();
+  if (!n) texto += " O programa está vazio.";
+  else if (s.sai !== null) { texto += ` No comando ${s.sai + 1}, ele sairia do tabuleiro.`; somBorda(s.x, N); }
+  else {
+    texto += ` Com ${n === 1 ? "o seu comando" : `os seus ${n} comandos`}, ele chega ${posicaoTexto(s.x, s.y, N)}.`;
+    somPosicao(s.x, s.y, N, !f || f.celulas.has(chave(s.x, s.y)));
+  }
+  dizer(texto);
+}
+function lerProgramaEmVoz() {
+  const nomes = (lista) => lista.map((n) => n.tipo === "mv" ? NOME_DIR[n.dir] : `repetir ${n.vezes} vezes: ${nomes(n.corpo)}`).join(", ");
+  const n = contarBlocos(est.programa);
+  dizer(n ? `Seu programa tem ${n === 1 ? "1 comando" : n + " comandos"}: ${nomes(est.programa)}.` : "O programa está vazio.");
+}
+const AJUDA_FALADA = "Ajuda. Setas colocam comandos. Enter faz o robô desenhar. Backspace apaga o último comando. " +
+  "Espaço repete a instrução. L diz onde o robô está. P lê o seu programa. Esc volta para a lista de fases.";
 
 /* ---------- Tabuleiro ---------- */
 const C = 100, M = 60;
@@ -869,9 +1527,10 @@ function reiniciarTabuleiro() {
 function desenharTabuleiro() {
   const svg = $("#tabuleiro");
   const N = est.tamanho, f = faseAtual();
+  const calmo = acess().calmo;
   svg.setAttribute("viewBox", `${-M} ${-M} ${N * C + 2 * M} ${N * C + 2 * M}`);
+  svg.setAttribute("aria-label", `Tabuleiro ${N} por ${N}. O robô está ${posicaoTexto(est.robo[0], est.robo[1], N)}.`);
   svg.innerHTML = "";
-  // casas
   for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
     svgEl("rect", { x: x * C, y: y * C, width: C, height: C, fill: (x + y) % 2 ? "#f4f8ff" : "#ffffff" }, svg);
   }
@@ -879,12 +1538,12 @@ function desenharTabuleiro() {
     svgEl("line", { x1: i * C, y1: 0, x2: i * C, y2: N * C, stroke: "#b0bec5", "stroke-width": 3 }, svg);
     svgEl("line", { x1: 0, y1: i * C, x2: N * C, y2: i * C, stroke: "#b0bec5", "stroke-width": 3 }, svg);
   }
-  // caminho pontilhado (1º ano)
+  // caminho pontilhado (1º ano e Modo Áudio)
   if (f && ANOS[est.ano].guia) {
     for (const k of f.celulas) {
       const [x, y] = k.split(",").map(Number);
       svgEl("rect", { x: x * C + 10, y: y * C + 10, width: C - 20, height: C - 20, rx: 16, fill: "#eceff1",
-        stroke: "#546e7a", "stroke-width": 5, "stroke-dasharray": "12 9" }, svg);
+        stroke: calmo ? "#7f909c" : "#546e7a", "stroke-width": 5, "stroke-dasharray": "12 9" }, svg);
     }
     svgEl("polyline", { points: f.caminho.map(([x, y]) => `${x * C + 50},${y * C + 50}`).join(" "),
       fill: "none", stroke: "#37474f", "stroke-width": 9, "stroke-linecap": "round", "stroke-linejoin": "round",
@@ -894,7 +1553,6 @@ function desenharTabuleiro() {
   for (const [k, cor] of est.pintadas) pintarCelula(gRastro, k, cor, false);
   const gDif = svgEl("g", { id: "g-dif" }, svg);
   desenharDiferencas(gDif);
-  // robô
   const robo = svgEl("g", { id: "robo" }, svg);
   const corpo = svgEl("g", { id: "robo-corpo" }, robo);
   svgEl("use", { href: "#desenho-robo" }, corpo);
@@ -919,29 +1577,32 @@ function posicionarRobo(x, y, animar = true) {
 }
 
 function desenharDiferencas(g) {
+  const calmo = acess().calmo;
   if (est.diferencas) {
     for (const k of est.diferencas.falta) {
       const [x, y] = k.split(",").map(Number);
       svgEl("rect", { x: x * C + 8, y: y * C + 8, width: C - 16, height: C - 16, rx: 16, fill: "#bbdefb",
-        stroke: "#0d47a1", "stroke-width": 8, "stroke-dasharray": "14 8", class: "pisca" }, g);
+        stroke: calmo ? "#4f7cac" : "#0d47a1", "stroke-width": 8, "stroke-dasharray": "14 8", class: calmo ? "" : "pisca" }, g);
     }
     for (const k of est.diferencas.mais) {
       const [x, y] = k.split(",").map(Number);
-      svgEl("rect", { x: x * C + 7, y: y * C + 7, width: C - 14, height: C - 14, rx: 18, fill: "url(#listras)",
-        stroke: "#1a2433", "stroke-width": 5, opacity: .9 }, g);
-      svgEl("circle", { cx: x * C + 50, cy: y * C + 50, r: 22, fill: "#fff", stroke: "#1a2433", "stroke-width": 4 }, g);
-      const t = svgEl("text", { x: x * C + 50, y: y * C + 61, "text-anchor": "middle", "font-size": 32, "font-weight": "bold", fill: "#1a2433" }, g);
-      t.textContent = "!";
+      svgEl("rect", { x: x * C + 7, y: y * C + 7, width: C - 14, height: C - 14, rx: 18,
+        fill: calmo ? "url(#listras-calmo)" : "url(#listras)", stroke: calmo ? "#6b7f8f" : "#1a2433", "stroke-width": 5, opacity: .9 }, g);
+      if (!calmo) {
+        svgEl("circle", { cx: x * C + 50, cy: y * C + 50, r: 22, fill: "#fff", stroke: "#1a2433", "stroke-width": 4 }, g);
+        const t = svgEl("text", { x: x * C + 50, y: y * C + 61, "text-anchor": "middle", "font-size": 32, "font-weight": "bold", fill: "#1a2433" }, g);
+        t.textContent = "!";
+      }
     }
   }
   if (est.foraDoTabuleiro) {
     const { x, y, dir } = est.foraDoTabuleiro;
     const [dx, dy] = DIRS[dir];
     const cx = x * C + 50 + dx * 82, cy = y * C + 50 + dy * 82;
-    const marca = svgEl("g", { class: "pisca" }, g);
-    svgEl("circle", { cx, cy, r: 28, fill: "#ff6d00", stroke: "#1a2433", "stroke-width": 5 }, marca);
+    const marca = svgEl("g", { class: calmo ? "" : "pisca" }, g);
+    svgEl("circle", { cx, cy, r: 28, fill: calmo ? "#9fb3c8" : "#ff6d00", stroke: "#1a2433", "stroke-width": 5 }, marca);
     const t = svgEl("text", { x: cx, y: cy + 12, "text-anchor": "middle", "font-size": 36, "font-weight": "bold", fill: "#fff" }, marca);
-    t.textContent = "!";
+    t.textContent = calmo ? "•" : "!";
   }
   $("#legenda").classList.toggle("oculto", !est.diferencas);
 }
@@ -971,26 +1632,48 @@ function adicionar(no) {
   const total = contarBlocos(est.programa);
   if (total >= limiteAtual()) {
     const f = faseAtual();
-    falar(f && f.limite ? `Você já usou os ${f.limite} blocos. Dica: use o REPETIR para economizar blocos!` :
-      "O programa está bem grande! Clique em Executar para ver o desenho.", "dica");
+    falar(f && f.limite ? msg("limite", { n: f.limite }) : msg("cheio"), "dica");
     tocar("dica");
     return;
   }
-  if (est.cursor.pai !== null && !acharNo(est.cursor.pai)) est.cursor = { pai: null, pos: est.programa.length };
+  // No Modo Áudio os comandos entram sempre no fim
+  if (acess().audio || (est.cursor.pai !== null && !acharNo(est.cursor.pai))) est.cursor = { pai: null, pos: est.programa.length };
   const lista = listaDe(est.cursor.pai);
   lista.splice(est.cursor.pos, 0, no);
   est.cursor.pos++;
   if (no.tipo === "rep") {
     est.cursor = { pai: no.id, pos: 0 };
-    falar("Agora clique nas setas que vão DENTRO do Repetir. Depois clique em “Sair do Repetir”.");
+    falar(msg("dentroRep"));
   }
-  tocar("clique");
   limparDicas();
   desenharPrograma();
+  if (acess().audio && no.tipo === "mv") {
+    somComando(no.dir);
+    const s = simular(), f = faseAtual();
+    if (s.sai !== null) {
+      setTimeout(() => somBorda(s.x, est.tamanho), 250);
+      dizer(`${NOME_DIR[no.dir]}. Essa seta levaria o robô para fora do tabuleiro.`);
+    } else {
+      setTimeout(() => somPosicao(s.x, s.y, est.tamanho, !f || f.celulas.has(chave(s.x, s.y))), 250);
+      dizer(NOME_DIR[no.dir]);
+    }
+  } else tocar("clique");
 }
 
 function apagar() {
   if (est.rodando) return;
+  if (acess().audio) {
+    est.cursor = { pai: null, pos: est.programa.length };
+    const ultimo = est.programa[est.programa.length - 1];
+    if (!ultimo) { dizer("O programa está vazio."); return; }
+    est.programa.pop();
+    est.cursor.pos--;
+    limparDicas();
+    desenharPrograma();
+    const n = contarBlocos(est.programa);
+    dizer(`Apaguei ${ultimo.tipo === "mv" ? NOME_DIR[ultimo.dir] : "repetir"}. ${n === 0 ? "O programa está vazio." : n === 1 ? "Ficou 1 comando." : `Ficaram ${n} comandos.`}`);
+    return;
+  }
   const { pai, pos } = est.cursor;
   const lista = listaDe(pai);
   if (pos > 0) {
@@ -1005,7 +1688,7 @@ function apagar() {
       est.cursor = { pai: info.pai, pos: info.pos + 1 };
     }
   } else if (est.programa.length) {
-    falar("Clique no bloco que você quer apagar e depois em Apagar.", "dica");
+    falar(msg("qualApagar"), "dica");
     return;
   }
   tocar("clique");
@@ -1030,9 +1713,7 @@ function limparTudo() {
   if (!est.livre) reiniciarTabuleiro();
 }
 
-function limparDicas() {
-  est.dicaId = null;
-}
+function limparDicas() { est.dicaId = null; }
 
 function moverCursor(pai, pos) {
   if (est.rodando) return;
@@ -1041,7 +1722,6 @@ function moverCursor(pai, pos) {
 }
 
 const SETA_SVG = '<svg viewBox="0 0 40 40" aria-hidden="true"><use href="#seta"/></svg>';
-const NOME_DIR = { U: "cima", D: "baixo", L: "esquerda", R: "direita" };
 
 function desenharPrograma() {
   const area = $("#programa");
@@ -1063,7 +1743,7 @@ function desenharPrograma() {
   $("#btn-executar .ico").textContent = est.rodando ? "⏹" : "▶";
 }
 
-function cursorEl() { const c = document.createElement("span"); c.className = "cursor"; c.id = "cursor"; return c; }
+function cursorEl() { const c = document.createElement("span"); c.className = "cursor"; c.setAttribute("aria-hidden", "true"); return c; }
 
 function desenharLista(lista, pai, caixa) {
   lista.forEach((n, i) => {
@@ -1078,7 +1758,7 @@ function blocoMv(n, pai, i) {
   b.className = "bloco bloco-" + n.dir + (est.dicaId === n.id ? " dica-bloco" : "");
   b.dataset.id = n.id;
   b.innerHTML = SETA_SVG;
-  b.setAttribute("aria-label", "Seta para " + NOME_DIR[n.dir]);
+  b.setAttribute("aria-label", `Comando ${i + 1}: seta para ${NOME_DIR[n.dir]}`);
   b.addEventListener("click", (e) => { e.stopPropagation(); moverCursor(pai, i + 1); });
   return b;
 }
@@ -1087,9 +1767,11 @@ function blocoRep(n, pai, i) {
   const r = document.createElement("div");
   r.className = "rep" + (est.cursor.pai === n.id ? " dentro" : "");
   r.dataset.id = n.id;
+  r.setAttribute("role", "group");
+  r.setAttribute("aria-label", `Repetir ${n.vezes} vezes`);
   const topo = document.createElement("div");
   topo.className = "rep-topo";
-  topo.innerHTML = `🔁 Repetir <button class="mais-menos" aria-label="Menos">−</button><span class="vezes">${n.vezes}</span><button class="mais-menos" aria-label="Mais">+</button> vezes`;
+  topo.innerHTML = `<span aria-hidden="true">🔁</span> Repetir <button class="mais-menos" aria-label="Menos uma vez">−</button><span class="vezes">${n.vezes}</span><button class="mais-menos" aria-label="Mais uma vez">+</button> vezes`;
   topo.addEventListener("click", (e) => { e.stopPropagation(); moverCursor(pai, i + 1); });
   const [menos, mais] = topo.querySelectorAll(".mais-menos");
   menos.addEventListener("click", (e) => { e.stopPropagation(); mudarVezes(n, -1); });
@@ -1123,98 +1805,114 @@ function marcarRodando(passo) {
 async function executar() {
   if (est.rodando) { est.parar = true; return; }
   if (!est.programa.length) {
-    falar("Primeiro clique nas setas para montar o programa.", "dica");
+    falar(msg("vazio"), "dica");
     tocar("dica");
     return;
   }
   const f = faseAtual();
+  const audio = acess().audio;
   if (f) reiniciarTabuleiro();
   else { est.foraDoTabuleiro = null; est.diferencas = null; desenharTabuleiro(); }
   est.dicaId = null;
   est.rodando = true; est.parar = false;
   desenharPrograma();
-  falar("O robô está desenhando...");
+  falar(msg("desenhando"));
   const passos = achatar(est.programa);
   const g = $("#g-rastro");
   let [x, y] = est.robo;
   if (!f) { est.pintadas.set(chave(x, y), salvo.cor); pintarCelula(g, chave(x, y), salvo.cor, true); }
   let primeiroErrado = null, saiu = null;
-  await esperar(250);
-  for (const p of passos) {
+  const feitos = [];
+  const tempoAndar = audio ? 380 : est.rapido ? 110 : 260;
+  const tempoPintar = audio ? 320 : est.rapido ? 40 : 140;
+  await aguardar(audio ? 1400 : 250);
+  for (let i = 0; i < passos.length; i++) {
+    const p = passos[i];
     if (est.parar) break;
     marcarRodando(p);
     const nx = x + DIRS[p.dir][0], ny = y + DIRS[p.dir][1];
     if (nx < 0 || ny < 0 || nx >= est.tamanho || ny >= est.tamanho) {
-      saiu = { x, y, dir: p.dir, id: p.id };
+      saiu = { x, y, dir: p.dir, id: p.id, idx: i };
+      if (audio) somBorda(x, est.tamanho);
       posicionarRobo(x + DIRS[p.dir][0] * 0.35, y + DIRS[p.dir][1] * 0.35);
-      await esperar(260);
+      await aguardar(260);
       posicionarRobo(x, y);
       break;
     }
     x = nx; y = ny;
     est.robo = [x, y];
     posicionarRobo(x, y);
-    tocar("passo");
-    await esperar(est.rapido ? 110 : 260);
     const k = chave(x, y);
+    const certo = !f || f.celulas.has(k);
+    if (audio) somPosicao(x, y, est.tamanho, certo);
+    else tocar("passo");
+    await aguardar(tempoAndar);
     est.pintadas.set(k, salvo.cor);
     pintarCelula(g, k, salvo.cor, true);
-    if (f && !f.celulas.has(k) && !primeiroErrado) primeiroErrado = p.id;
-    await esperar(est.rapido ? 40 : 140);
+    feitos.push(p.dir);
+    if (!certo && primeiroErrado === null) primeiroErrado = i;
+    await aguardar(tempoPintar);
   }
   marcarRodando(null);
   const parou = est.parar;
   est.rodando = false; est.parar = false;
+  if (telaAtiva() !== "tela-jogo") return;
 
+  const desenho = resumoCaminho(feitos);
+  const qtd = passos.length;
   if (parou) {
     desenharPrograma();
-    falar("Programa parado. Clique em Executar para tentar de novo.");
+    falar(msg("parado"));
     return;
   }
   if (saiu) {
     est.foraDoTabuleiro = saiu;
     apontarBloco(saiu.id);
     desenharTabuleiro();
-    falar("Quase! Este bloco leva o robô para fora do tabuleiro. Clique em Apagar e escolha outra seta.", "dica");
+    falar(msg("fora", { desenho, n: saiu.idx + 1, dir: NOME_DIR[saiu.dir], k: qtd - saiu.idx }), "dica");
     tocar("dica");
     return;
   }
   if (!f) {
     desenharPrograma();
-    falar("Que desenho bonito! Troque a cor e continue, ou clique em Nova folha.", "festa");
+    falar(msg("livreFim"), "festa");
     tocar("vitoria");
     return;
   }
   const falta = [...f.celulas].filter((k) => !est.pintadas.has(k));
   const mais = [...est.pintadas.keys()].filter((k) => !f.celulas.has(k));
-  if (!falta.length && !mais.length) { vitoria(); return; }
+  if (!falta.length && !mais.length) { vitoria(desenho); return; }
   est.diferencas = { falta, mais };
   desenharTabuleiro();
   if (mais.length) {
-    apontarBloco(primeiroErrado);
-    falar("Quase! As casas com ! não fazem parte do desenho. A diferença começou no bloco que pisca: apague e troque.", "dica");
+    apontarBloco(passos[primeiroErrado].id);
+    falar(msg("mais", { desenho, n: primeiroErrado + 1, dir: NOME_DIR[passos[primeiroErrado].dir], k: qtd - primeiroErrado }), "dica");
   } else {
     est.cursor = { pai: null, pos: est.programa.length };
-    const ultimo = passos[passos.length - 1];
-    apontarBloco(ultimo.id, false);
-    falar("Muito bem até aqui! Faltam as casas que piscam. Continue o programa depois do bloco que pisca.", "dica");
+    apontarBloco(passos[passos.length - 1].id, false);
+    // sugere a direção de uma casa vizinha que ainda falta
+    let sugestao = null;
+    for (const d of ["R", "D", "L", "U"]) {
+      if (falta.includes(chave(x + DIRS[d][0], y + DIRS[d][1]))) { sugestao = PARA_DIR[d]; break; }
+    }
+    falar(msg("falta", { desenho, q: falta.length, sugestao }), "dica");
   }
   tocar("dica");
 }
 
 function apontarBloco(id, moverCursorJunto = true) {
   est.dicaId = id;
-  if (moverCursorJunto) {
+  if (moverCursorJunto && !acess().audio) {
     const info = acharNo(id);
     if (info) est.cursor = { pai: info.pai, pos: info.pos + 1 };
   }
   desenharPrograma();
   const el = $(`#programa [data-id="${id}"]`);
-  if (el) el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  if (el) el.scrollIntoView({ block: "nearest" });
 }
 
 /* ---------- Vitória ---------- */
-function vitoria() {
+function vitoria(desenho) {
   const f = faseAtual();
   const blocos = contarBlocos(est.programa);
   const n = estrelasPara(blocos, f.ref);
@@ -1222,34 +1920,44 @@ function vitoria() {
   salvo.estrelas[k] = Math.max(salvo.estrelas[k] || 0, n);
   salvar();
   desenharPrograma();
-  falar("Você conseguiu! O desenho ficou igual!", "festa");
+  desenharProgresso();
+  const ultima = est.faseIdx >= FASES[est.ano].length - 1;
+  const calmo = acess().calmo;
   tocar("vitoria");
   const caixa = $("#vitoria-estrelas");
   caixa.innerHTML = "";
-  for (let i = 0; i < 3; i++) {
-    const s = document.createElement("span");
-    s.textContent = "★";
-    s.className = i < n ? "estrela-on" : "estrela-off";
-    caixa.appendChild(s);
-    setTimeout(() => s.classList.add("mostra"), 300 + i * 350);
+  if (calmo) {
+    // Recompensa sempre igual no Modo Calmo
+    $("#vitoria-titulo").textContent = "Fase completa";
+    caixa.innerHTML = '<span class="selo-calmo" aria-hidden="true">✔</span>';
+    $("#vitoria-texto").textContent = "Você terminou a fase. O desenho está igual ao modelo.";
+    $("#vitoria-dica").textContent = "";
+  } else {
+    $("#vitoria-titulo").textContent = "🎉 Muito bem!";
+    caixa.setAttribute("aria-label", `${n} ${n === 1 ? "estrela" : "estrelas"}`);
+    for (let i = 0; i < 3; i++) {
+      const s = document.createElement("span");
+      s.textContent = "★";
+      s.setAttribute("aria-hidden", "true");
+      s.className = i < n ? "estrela-on" : "estrela-off";
+      caixa.appendChild(s);
+      setTimeout(() => s.classList.add("mostra"), 300 + i * 350);
+    }
+    $("#vitoria-texto").textContent = `Você usou ${blocos} ${blocos === 1 ? "bloco" : "blocos"}.`;
+    $("#vitoria-dica").textContent = n === 3 ? "Incrível! Programa bem curtinho!" :
+      "Desafio: dá para desenhar com menos blocos" + (ANOS[est.ano].repetir ? " usando o REPETIR!" : ", sem voltar pelo mesmo caminho!");
   }
-  $("#vitoria-texto").textContent = `Você usou ${blocos} ${blocos === 1 ? "bloco" : "blocos"}.`;
-  let dica = "";
-  if (n === 3) dica = "Incrível! Programa bem curtinho!";
-  else dica = "Desafio: dá para desenhar com menos blocos" + (ANOS[est.ano].repetir ? " usando o REPETIR!" : ", sem voltar pelo mesmo caminho!");
-  $("#vitoria-dica").textContent = dica;
-  const temLetra = !!f.letra;
-  $("#letra-show").classList.toggle("oculto", !temLetra);
-  if (temLetra) {
+  $("#letra-show").classList.toggle("oculto", !f.letra);
+  if (f.letra) {
     $("#letra-grande").textContent = f.letra;
     $("#figura-palavra").textContent = f.emoji;
-    const resto = f.palavra.slice(f.letra.length);
-    $("#palavra").innerHTML = `<b>${f.letra}</b>${resto}`;
+    $("#palavra").innerHTML = `<b>${f.letra}</b>${f.palavra.slice(f.letra.length)}`;
   }
-  $("#btn-proxima").classList.toggle("oculto", est.faseIdx >= FASES[est.ano].length - 1);
-  $("#btn-de-novo").classList.toggle("oculto", n === 3);
-  abrirModal("modal-vitoria");
-  confete();
+  $("#btn-proxima").classList.toggle("oculto", ultima);
+  $("#btn-de-novo").classList.toggle("oculto", n === 3 || calmo);
+  falar(msg("vitoria", { desenho, estrelas: n, letra: f.letra, palavra: f.palavra, ultima }), "festa");
+  abrirModal("modal-vitoria", true);
+  if (!calmo && !acess().audio) confete();
 }
 
 function confete() {
@@ -1267,33 +1975,123 @@ function confete() {
 }
 
 /* ---------- Janelas ---------- */
-function abrirModal(id) {
+let focoAntes = null;
+function abrirModal(id, silencioso) {
   if (id === "modal-ajuda") {
-    $("#passo-rep").classList.toggle("oculto", $("#tela-jogo").classList.contains("ativa") && !ANOS[est.ano].repetir && !est.livre);
+    $("#passo-rep").classList.toggle("oculto", telaAtiva() === "tela-jogo" && !ANOS[est.ano].repetir && !est.livre);
     const s = document.createElementNS(NS, "svg");
     s.setAttribute("class", "mini");
     desenharMini(s, new Set(["0,0", "1,0", "2,0", "2,1", "2,2"]), 3, null, salvo.cor);
     $("#ilus-desenho").replaceChildren(s);
   }
+  if (!$(".modal.aberto")) focoAntes = document.activeElement;
   $("#" + id).classList.add("aberto");
-  const b = $("#" + id + " .btn-verde:not(.oculto)");
-  if (b) b.focus();
+  const alvo = $(`#${id} .btn-verde:not(.oculto)`) || $(`#${id} button:not(.oculto)`);
+  if (silencioso) focar(alvo); else if (alvo) alvo.focus();
 }
-function fecharModal(id) { $("#" + id).classList.remove("aberto"); }
+function fecharModal(id) {
+  $("#" + id).classList.remove("aberto");
+  if ($(".modal.aberto")) return;
+  if (telaAtiva() === "tela-jogo" && acess().audio) focar($("#zona-jogo"));
+  else if (focoAntes && document.contains(focoAntes)) focar(focoAntes);
+}
+
+function pausar() {
+  est.pausado = true;
+  calar();
+  abrirModal("modal-pausa");
+}
+function voltarDaPausa() {
+  est.pausado = false;
+  fecharModal("modal-pausa");
+}
+
+/* ---------- Área do professor ---------- */
+let respostaProf = 0;
+function abrirProfessor() {
+  const a = 4 + Math.floor(Math.random() * 6), b = 4 + Math.floor(Math.random() * 6);
+  respostaProf = a + b;
+  $("#pergunta-codigo").textContent = `Quanto é ${a} + ${b}?`;
+  $("#campo-codigo").value = "";
+  $("#aviso-prof").textContent = "";
+  $("#aviso-progresso").textContent = "";
+  $("#prof-entrada").classList.remove("oculto");
+  $("#prof-painel").classList.add("oculto");
+  $("#confirma-apagar").classList.add("oculto");
+  focoAntes = document.activeElement;
+  $("#modal-prof").classList.add("aberto");
+  $("#campo-codigo").focus();
+}
+$("#prof-entrada").addEventListener("submit", (e) => {
+  e.preventDefault();
+  if (parseInt($("#campo-codigo").value, 10) === respostaProf) {
+    $("#prof-entrada").classList.add("oculto");
+    $("#prof-painel").classList.remove("oculto");
+    focar($("#prof-painel .chave"));
+  } else {
+    $("#aviso-prof").textContent = "Resposta diferente. Tente de novo.";
+    $("#campo-codigo").select();
+  }
+});
+$("#btn-apagar-progresso").addEventListener("click", () => {
+  $("#confirma-apagar").classList.remove("oculto");
+  $("#aviso-progresso").textContent = "";
+  $("#btn-confirma-nao").focus();
+});
+$("#btn-confirma-nao").addEventListener("click", () => {
+  $("#confirma-apagar").classList.add("oculto");
+  $("#btn-apagar-progresso").focus();
+});
+$("#btn-confirma-sim").addEventListener("click", () => {
+  salvo.estrelas = {};
+  salvar();
+  $("#confirma-apagar").classList.add("oculto");
+  $("#aviso-progresso").textContent = "✔ Progresso apagado. O jogo voltou ao início neste computador.";
+  $("#btn-apagar-progresso").focus();
+});
 
 /* ---------- Ligações dos botões ---------- */
 document.addEventListener("click", (e) => {
+  const chaveBtn = e.target.closest(".chave");
+  if (chaveBtn) {
+    const op = chaveBtn.dataset.opcao;
+    if (op === "liberado") salvo.liberado = !salvo.liberado;
+    else acess()[op] = !acess()[op];
+    salvar();
+    aplicarAcess();
+    focar($(`.chave[data-opcao="${op}"]`));
+    if (op === "audio") {
+      if (acess().audio) dizer("Modo Áudio ligado.");
+      else calar();
+    }
+    if (op === "vozJogo") { if (acess().vozJogo) dizer("Voz do jogo ligada."); else calar(); }
+    if (telaAtiva() === "tela-fases" && !acess().audio) abrirAno(est.ano);
+    else if (telaAtiva() === "tela-jogo") { desenharTabuleiro(); desenharProgresso(); }
+    return;
+  }
   const alvo = e.target.closest("[data-acao]");
   if (!alvo) return;
   const acao = alvo.dataset.acao;
   if (acao === "ajuda") abrirModal("modal-ajuda");
-  else if (acao === "fechar-ajuda") fecharModal("modal-ajuda");
+  else if (acao === "acess") abrirModal("modal-acess");
+  else if (acao === "professor") abrirProfessor();
+  else if (acao === "fechar") fecharModal(alvo.dataset.modal);
+  else if (acao === "pausa") pausar();
+  else if (acao === "voltar-pausa") voltarDaPausa();
+  else if (acao === "testar-voz") {
+    if (!window.speechSynthesis) { anunciar("Este navegador não tem voz."); return; }
+    const antes = acess().vozJogo;
+    acess().vozJogo = true;
+    dizer("Olá! Eu sou o Robô Desenhista. Vamos desenhar juntos!");
+    acess().vozJogo = antes;
+  }
   else if (acao === "som") { salvo.som = !salvo.som; salvar(); atualizarSom(); tocar("clique"); }
   else if (acao === "inicio") mostrarTela("tela-inicio");
-  else if (acao === "fases") { est.parar = true; abrirAno(est.ano); }
-  else if (acao === "fases-vitoria") { fecharModal("modal-vitoria"); abrirAno(est.ano); }
+  else if (acao === "fases") abrirAno(est.livre ? 3 : est.ano, est.livre ? undefined : est.faseIdx);
+  else if (acao === "fases-vitoria") { fecharModal("modal-vitoria"); abrirAno(est.ano, est.faseIdx); }
 });
 $$(".btn-ano").forEach((b) => b.addEventListener("click", () => abrirAno(+b.dataset.ano)));
+$("#btn-comecar-audio").addEventListener("click", () => iniciarFase("A", proximaFaseAberta("A")));
 $$("#paleta [data-dir]").forEach((b) => b.addEventListener("click", () => adicionar({ id: novoId(), tipo: "mv", dir: b.dataset.dir })));
 $("#btn-repetir").addEventListener("click", () => adicionar({ id: novoId(), tipo: "rep", vezes: 2, corpo: [] }));
 $("#btn-sair-rep").addEventListener("click", () => {
@@ -1309,7 +2107,7 @@ $("#btn-recomecar").addEventListener("click", () => {
   limparDicas();
   reiniciarTabuleiro();
   desenharPrograma();
-  falar(est.livre ? "Folha nova! Desenhe o que quiser." : "O robô voltou para o começo. Seu programa continua aqui.");
+  falar(est.livre ? msg("novaFolha") : msg("recomecar"));
 });
 $("#btn-velocidade").addEventListener("click", () => {
   est.rapido = !est.rapido;
@@ -1320,18 +2118,59 @@ $("#btn-proxima").addEventListener("click", () => { fecharModal("modal-vitoria")
 $("#btn-de-novo").addEventListener("click", () => {
   fecharModal("modal-vitoria");
   reiniciarTabuleiro();
-  falar("Tente desenhar a mesma figura com menos blocos!");
+  falar(msg("menosBlocos"));
 });
 
-/* Atalhos de teclado (opcionais) */
+// No Modo Áudio, o jogo lê em voz alta o botão que recebe o foco (Tab)
+document.addEventListener("focusin", (e) => {
+  if (!acess().audio || focoSilencioso) return;
+  const el = e.target.closest("button, input");
+  if (!el) return;
+  let texto = el.getAttribute("aria-label") || el.textContent.trim();
+  if (el.getAttribute("role") === "switch") {
+    const rot = el.getAttribute("aria-labelledby");
+    texto = (rot ? $("#" + rot).textContent + ": " : "") + (el.getAttribute("aria-checked") === "true" ? "ligado" : "desligado");
+  }
+  if (el.tagName === "INPUT") texto = ($(`label[for="${el.id}"]`) || {}).textContent || "Campo de texto";
+  if (texto) dizer(texto);
+});
+
+/* Teclado */
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") { fecharModal("modal-ajuda"); return; }
-  if (!$("#tela-jogo").classList.contains("ativa") || $(".modal.aberto")) return;
+  const aberto = $(".modal.aberto");
+  const audio = acess().audio;
+  const tela = telaAtiva();
+  if (e.key === "Escape") {
+    if (aberto) {
+      if (aberto.id === "modal-vitoria") { fecharModal("modal-vitoria"); abrirAno(est.ano, est.faseIdx); }
+      else if (aberto.id !== "modal-pausa") fecharModal(aberto.id);
+    } else if (tela === "tela-jogo" && audio) abrirAno(est.livre ? 3 : est.ano, est.livre ? undefined : est.faseIdx);
+    else if (tela === "tela-fases" && audio) mostrarTela("tela-inicio");
+    return;
+  }
+  if (aberto || e.ctrlKey || e.altKey || e.metaKey) return;
   const setas = { ArrowUp: "U", ArrowDown: "D", ArrowLeft: "L", ArrowRight: "R" };
+
+  // Lista de fases: setas mudam a fase escolhida
+  if (tela === "tela-fases" && setas[e.key]) {
+    const botoes = [...$$("#grade-fases .btn-fase")];
+    const i = botoes.indexOf(document.activeElement);
+    if (i < 0) return;
+    e.preventDefault();
+    const d = setas[e.key] === "R" || setas[e.key] === "D" ? 1 : -1;
+    botoes[Math.max(0, Math.min(botoes.length - 1, i + d))].focus();
+    return;
+  }
+  if (tela !== "tela-jogo") return;
+  const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
   if (setas[e.key]) { e.preventDefault(); adicionar({ id: novoId(), tipo: "mv", dir: setas[e.key] }); }
-  else if (e.key === "Backspace" || e.key === "Delete") { e.preventDefault(); apagar(); }
-  else if (e.key === "Enter" && e.target === document.body) { e.preventDefault(); executar(); }
-  else if ((e.key === "r" || e.key === "R") && !$("#btn-repetir").classList.contains("oculto")) {
+  else if (k === "Backspace" || k === "Delete") { e.preventDefault(); apagar(); }
+  else if (k === "Enter" && (audio || e.target === document.body || e.target === $("#zona-jogo"))) { e.preventDefault(); executar(); }
+  else if (audio && k === " ") { e.preventDefault(); dizer(est.instrucao); }
+  else if (audio && k === "l") { e.preventDefault(); dizerOnde(); }
+  else if (audio && k === "h") { e.preventDefault(); dizer(AJUDA_FALADA); }
+  else if (audio && k === "p") { e.preventDefault(); lerProgramaEmVoz(); }
+  else if (k === "r" && !audio && !$("#btn-repetir").classList.contains("oculto")) {
     adicionar({ id: novoId(), tipo: "rep", vezes: 2, corpo: [] });
   }
 });
@@ -1339,6 +2178,8 @@ document.addEventListener("keydown", (e) => {
 /* ---------- Início ---------- */
 desenharCores();
 atualizarSom();
+aplicarAcess();
+mostrarTela("tela-inicio");
 
 /* Guarda o jogo no computador para funcionar sem internet */
 if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {

@@ -25,3 +25,12 @@ Se algo ficar diferente, o tabuleiro mostra as casas que faltaram ou sobraram e 
 - As estrelas ficam guardadas em cada computador.
 
 Feito só com HTML, CSS e JavaScript, sem instalação: tudo está em `index.html` (e `sw.js`, que guarda o jogo para uso sem internet).
+
+## Acessibilidade
+Na tela inicial, o botão **Acessibilidade** abre as opções (elas ficam guardadas em cada computador):
+- **Modo Áudio** — para estudante cego, com teclado e fones de ouvido. O jogo fala em português, tem fases pequenas (3 × 3 e 4 × 4) e sons que guiam o robô (esquerda/direita no fone, agudo em cima, grave embaixo). Teclas: setas (comandos), Enter (executar), Backspace (apagar), Espaço (repetir instrução), L (onde está o robô), P (ler o programa), H (ajuda), Esc (voltar). Funciona também com NVDA e Narrador; nesse caso, desligue a "Voz do próprio jogo".
+- **Modo Calmo** — cores suaves, nada piscando, barra de progresso, passos numerados, botão Pausa e recompensa sempre igual. Pode desligar todas as animações.
+- **Letras e botões maiores** e **Alto contraste**.
+
+## Área do professor
+Botão discreto no canto da tela inicial, protegido por uma continha. Permite liberar todas as fases, apagar o progresso do computador e abrir as configurações de acessibilidade.
