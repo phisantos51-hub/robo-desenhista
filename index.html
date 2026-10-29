@@ -1710,7 +1710,8 @@ function limparTudo() {
   est.cursor = { pai: null, pos: 0 };
   limparDicas();
   desenharPrograma();
-  if (!est.livre) reiniciarTabuleiro();
+  reiniciarTabuleiro();
+  if (est.livre) falar(msg("novaFolha"));
 }
 
 function limparDicas() { est.dicaId = null; }
