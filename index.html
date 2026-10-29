@@ -278,6 +278,11 @@ button:focus-visible, [tabindex]:focus-visible { outline: 5px solid #ffab00; out
 .celula-rastro { transform-box: fill-box; transform-origin: center; animation: aparece .3s ease-out; }
 @keyframes aparece { from { transform: scale(.2); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 #robo { transition: transform .28s ease-in-out; }
+#tabuleiro.livre { touch-action: none; cursor: pointer; }
+#tabuleiro.livre #robo { cursor: grab; }
+#tabuleiro.arrastando, #tabuleiro.arrastando #robo { cursor: grabbing; }
+#tabuleiro.arrastando #robo { transition: none; }
+.casa-alvo { fill: none; stroke: #1e63d6; stroke-width: 8; stroke-dasharray: 14 8; pointer-events: none; }
 .pisca { animation: piscaSvg 1s ease-in-out infinite; }
 @keyframes piscaSvg { 50% { opacity: .25; } }
 
@@ -1156,8 +1161,10 @@ const MSG = {
       (d.letra ? ` Você desenhou a letra ${d.letra}, de ${d.palavra}.` : "") +
       (d.ultima ? " Você terminou todas as fases do Modo Áudio!" : " Aperte Enter para ir para a próxima fase.")
   },
-  livreInicio: { normal: "Desenhe o que quiser! Depois troque a cor e continue desenhando.",
-                 calmo: "Monte as setas e clique em Executar para desenhar. Você pode trocar a cor entre um desenho e outro." },
+  livreInicio: { normal: "Desenhe o que quiser! Arraste o robô para escolher onde ele começa.",
+                 calmo: "Arraste o robô até a casa onde ele vai começar. Depois monte as setas e clique em Executar." },
+  roboMovido: { normal: "O robô começa aqui agora. Monte as setas e clique em Executar!",
+                calmo: "O robô vai começar nesta casa. Monte as setas e clique em Executar." },
   livreFim: { normal: "Que desenho bonito! Troque a cor e continue, ou clique em Nova folha.",
               calmo: "Desenho feito. Você pode trocar a cor e executar de novo, ou clicar em Nova folha." },
   limite: { normal: (d) => `Você já usou os ${d.n} blocos. Dica: use o REPETIR para economizar blocos!`,
@@ -1529,6 +1536,7 @@ function desenharTabuleiro() {
   const N = est.tamanho, f = faseAtual();
   const calmo = acess().calmo;
   svg.setAttribute("viewBox", `${-M} ${-M} ${N * C + 2 * M} ${N * C + 2 * M}`);
+  svg.classList.toggle("livre", est.livre);
   svg.setAttribute("aria-label", `Tabuleiro ${N} por ${N}. O robô está ${posicaoTexto(est.robo[0], est.robo[1], N)}.`);
   svg.innerHTML = "";
   for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
@@ -1566,6 +1574,76 @@ function pintarCelula(g, k, cor, animar) {
   if (antigo) antigo.remove();
   svgEl("rect", { "data-k": k, x: x * C + 7, y: y * C + 7, width: C - 14, height: C - 14, rx: 18, fill: cor,
     class: animar ? "celula-rastro" : "", stroke: "rgba(0,0,0,.25)", "stroke-width": 3 }, g);
+}
+
+/* Modo Livre: arrastar o robô (ou clicar numa casa) para escolher onde ele começa */
+let arrasto = null;
+function pontoNoTabuleiro(e) {
+  const svg = $("#tabuleiro");
+  const pt = svg.createSVGPoint();
+  pt.x = e.clientX; pt.y = e.clientY;
+  return pt.matrixTransform(svg.getScreenCTM().inverse());
+}
+function casaNoPonto(p) {
+  const lim = (v) => Math.max(0, Math.min(est.tamanho - 1, Math.floor(v / C)));
+  return [lim(p.x), lim(p.y)];
+}
+function mostrarCasaAlvo(x, y) {
+  let r = $("#casa-alvo");
+  if (!r) r = svgEl("rect", { id: "casa-alvo", class: "casa-alvo", width: C - 8, height: C - 8, rx: 16 });
+  $("#tabuleiro").insertBefore(r, $("#robo"));
+  r.setAttribute("x", x * C + 4); r.setAttribute("y", y * C + 4);
+}
+function colocarRobo(x, y) {
+  est.robo = [x, y];
+  est.foraDoTabuleiro = null;
+  limparDicas();
+  desenharTabuleiro();
+  desenharPrograma();
+  falar(msg("roboMovido"));
+  tocar("clique");
+}
+function ligarArrasto() {
+  const tab = $("#tabuleiro");
+  tab.addEventListener("pointerdown", (e) => {
+    if (!est.livre || est.rodando || e.button > 0) return;
+    const p = pontoNoTabuleiro(e);
+    const [x, y] = casaNoPonto(p);
+    if (x !== est.robo[0] || y !== est.robo[1]) return;
+    e.preventDefault();
+    arrasto = { pointerId: e.pointerId };
+    tab.setPointerCapture(e.pointerId);
+    tab.classList.add("arrastando");
+  });
+  tab.addEventListener("pointermove", (e) => {
+    if (!arrasto) return;
+    const p = pontoNoTabuleiro(e);
+    const N = est.tamanho;
+    const px = Math.max(-C / 2, Math.min(N * C - C / 2, p.x - C / 2));
+    const py = Math.max(-C / 2, Math.min(N * C - C / 2, p.y - C / 2));
+    $("#robo").style.transform = `translate(${px}px, ${py}px)`;
+    mostrarCasaAlvo(...casaNoPonto(p));
+  });
+  const soltar = (e) => {
+    if (arrasto) {
+      arrasto = null;
+      tab.classList.remove("arrastando");
+      colocarRobo(...casaNoPonto(pontoNoTabuleiro(e)));
+      return;
+    }
+    // um clique simples numa casa também leva o robô para lá
+    if (e.type !== "pointerup" || !est.livre || est.rodando || e.button > 0) return;
+    const p = pontoNoTabuleiro(e);
+    if (p.x < 0 || p.y < 0 || p.x >= est.tamanho * C || p.y >= est.tamanho * C) return;
+    colocarRobo(...casaNoPonto(p));
+  };
+  tab.addEventListener("pointerup", soltar);
+  tab.addEventListener("pointercancel", () => {
+    if (!arrasto) return;
+    arrasto = null;
+    tab.classList.remove("arrastando");
+    desenharTabuleiro();
+  });
 }
 
 function posicionarRobo(x, y, animar = true) {
@@ -2177,6 +2255,7 @@ document.addEventListener("keydown", (e) => {
 });
 
 /* ---------- Início ---------- */
+ligarArrasto();
 desenharCores();
 atualizarSom();
 aplicarAcess();
