@@ -282,6 +282,10 @@ button:focus-visible, [tabindex]:focus-visible { outline: 5px solid #ffab00; out
 #tabuleiro.livre #robo { cursor: grab; }
 #tabuleiro.arrastando, #tabuleiro.arrastando #robo { cursor: grabbing; }
 #tabuleiro.arrastando #robo { transition: none; }
+#tabuleiro.borracha { cursor: cell; border-color: #c2185b; border-style: dashed; }
+#tabuleiro.borracha #robo { cursor: cell; }
+.acoes .btn-borracha { grid-column: 1 / -1; flex-direction: row; min-height: 60px; font-size: 19px; }
+.btn-borracha[aria-pressed="true"] { background: #ffe0ec; border-color: #c2185b; }
 .casa-alvo { fill: none; stroke: #1e63d6; stroke-width: 8; stroke-dasharray: 14 8; pointer-events: none; }
 .pisca { animation: piscaSvg 1s ease-in-out infinite; }
 @keyframes piscaSvg { 50% { opacity: .25; } }
@@ -626,6 +630,7 @@ body.contraste .painel h3 .contador, body.contraste .painel h3 .contador.cheio {
         <button class="btn btn-vermelho" id="btn-limpar"><span class="ico" aria-hidden="true">🗑️</span> <span id="txt-limpar">Limpar tudo</span></button>
         <button class="btn" id="btn-recomecar"><span class="ico" aria-hidden="true">↺</span> <span id="txt-recomecar">Recomeçar</span></button>
         <button class="btn" id="btn-velocidade"><span class="ico" id="ico-vel" aria-hidden="true">🐢</span> <span id="txt-vel">Devagar</span></button>
+        <button class="btn btn-borracha oculto" id="btn-borracha" aria-pressed="false"><span class="ico" aria-hidden="true">🧽</span> <span id="txt-borracha">Borracha: apagar quadrados do desenho</span></button>
       </div>
     </div>
   </main>
@@ -1163,6 +1168,10 @@ const MSG = {
   },
   livreInicio: { normal: "Desenhe o que quiser! Arraste o robô para escolher onde ele começa.",
                  calmo: "Arraste o robô até a casa onde ele vai começar. Depois monte as setas e clique em Executar." },
+  borrachaLigada: { normal: "Borracha ligada! Clique nos quadrados que quer apagar. Para desligar, clique em Borracha de novo.",
+                    calmo: "A borracha está ligada. Clique em um quadrado para apagar. Clique no botão Borracha para desligar." },
+  borrachaDesligada: { normal: "Borracha desligada. Agora você pode mover o robô e desenhar.",
+                       calmo: "A borracha está desligada." },
   roboMovido: { normal: "O robô começa aqui agora. Monte as setas e clique em Executar!",
                 calmo: "O robô vai começar nesta casa. Monte as setas e clique em Executar." },
   livreFim: { normal: "Que desenho bonito! Troque a cor e continue, ou clique em Nova folha.",
@@ -1193,7 +1202,7 @@ const est = {
   robo: [0, 0], pintadas: new Map(),
   rodando: false, parar: false, pausado: false, rapido: false,
   dicaId: null, foraDoTabuleiro: null, diferencas: null,
-  teclasDitas: false, instrucao: ""
+  teclasDitas: false, instrucao: "", borracha: false
 };
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => document.querySelectorAll(s);
@@ -1392,6 +1401,9 @@ function prepararJogo() {
   est.dicaId = null;
   est.parar = false;
   est.pausado = false;
+  est.borracha = false;
+  atualizarBorracha();
+  $("#btn-borracha").classList.toggle("oculto", !est.livre);
   desenharCores();
   mostrarTela("tela-jogo");
   reiniciarTabuleiro();
@@ -1537,6 +1549,7 @@ function desenharTabuleiro() {
   const calmo = acess().calmo;
   svg.setAttribute("viewBox", `${-M} ${-M} ${N * C + 2 * M} ${N * C + 2 * M}`);
   svg.classList.toggle("livre", est.livre);
+  svg.classList.toggle("borracha", est.livre && est.borracha);
   svg.setAttribute("aria-label", `Tabuleiro ${N} por ${N}. O robô está ${posicaoTexto(est.robo[0], est.robo[1], N)}.`);
   svg.innerHTML = "";
   for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
@@ -1603,11 +1616,41 @@ function colocarRobo(x, y) {
   falar(msg("roboMovido"));
   tocar("clique");
 }
+/* Borracha do Modo Livre: apaga um quadrado por vez (ou vários, arrastando) */
+let apagando = false;
+function atualizarBorracha() {
+  const b = $("#btn-borracha");
+  b.setAttribute("aria-pressed", est.borracha ? "true" : "false");
+  $("#txt-borracha").textContent = est.borracha ? "Borracha ligada (clique aqui para desligar)" : "Borracha: apagar quadrados do desenho";
+  $("#tabuleiro").classList.toggle("borracha", est.livre && est.borracha);
+}
+function alternarBorracha() {
+  est.borracha = !est.borracha;
+  atualizarBorracha();
+  falar(msg(est.borracha ? "borrachaLigada" : "borrachaDesligada"));
+  tocar("clique");
+}
+function apagarQuadrado(p) {
+  if (p.x < 0 || p.y < 0 || p.x >= est.tamanho * C || p.y >= est.tamanho * C) return;
+  const k = chave(...casaNoPonto(p));
+  if (!est.pintadas.has(k)) return;
+  est.pintadas.delete(k);
+  const r = $(`#g-rastro [data-k="${k}"]`);
+  if (r) r.remove();
+  tocar("clique");
+}
 function ligarArrasto() {
   const tab = $("#tabuleiro");
   tab.addEventListener("pointerdown", (e) => {
     if (!est.livre || est.rodando || e.button > 0) return;
     const p = pontoNoTabuleiro(e);
+    if (est.borracha) {
+      e.preventDefault();
+      apagando = true;
+      tab.setPointerCapture(e.pointerId);
+      apagarQuadrado(p);
+      return;
+    }
     const [x, y] = casaNoPonto(p);
     if (x !== est.robo[0] || y !== est.robo[1]) return;
     e.preventDefault();
@@ -1616,6 +1659,7 @@ function ligarArrasto() {
     tab.classList.add("arrastando");
   });
   tab.addEventListener("pointermove", (e) => {
+    if (apagando) { apagarQuadrado(pontoNoTabuleiro(e)); return; }
     if (!arrasto) return;
     const p = pontoNoTabuleiro(e);
     const N = est.tamanho;
@@ -1625,6 +1669,8 @@ function ligarArrasto() {
     mostrarCasaAlvo(...casaNoPonto(p));
   });
   const soltar = (e) => {
+    if (apagando) { apagando = false; return; }
+    if (est.borracha) return;
     if (arrasto) {
       arrasto = null;
       tab.classList.remove("arrastando");
@@ -1639,6 +1685,7 @@ function ligarArrasto() {
   };
   tab.addEventListener("pointerup", soltar);
   tab.addEventListener("pointercancel", () => {
+    apagando = false;
     if (!arrasto) return;
     arrasto = null;
     tab.classList.remove("arrastando");
@@ -1892,6 +1939,7 @@ async function executar() {
   const audio = acess().audio;
   if (f) reiniciarTabuleiro();
   else { est.foraDoTabuleiro = null; est.diferencas = null; desenharTabuleiro(); }
+  if (est.borracha) { est.borracha = false; atualizarBorracha(); }
   est.dicaId = null;
   est.rodando = true; est.parar = false;
   desenharPrograma();
@@ -2256,6 +2304,7 @@ document.addEventListener("keydown", (e) => {
 
 /* ---------- Início ---------- */
 ligarArrasto();
+$("#btn-borracha").addEventListener("click", alternarBorracha);
 desenharCores();
 atualizarSom();
 aplicarAcess();
